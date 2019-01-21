@@ -1,0 +1,8 @@
+[package]
+name = "gitweb-rust"
+version = "0.1.0"
+authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
+edition = "2018"
+
+[dependencies]
+regex = "1"
