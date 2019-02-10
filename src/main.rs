@@ -19,7 +19,7 @@ pub struct Opt {
     #[structopt(short = "-B", long)]
     browser: Option<String>,
 
-    /// Set the remote to use
+    /// Set the remote
     #[structopt(short, long)]
     remote: Option<String>,
 
@@ -100,23 +100,33 @@ fn get_remote_url() -> String {
     get_command_output("git config --get remote.origin.url")
 }
 
+fn print_verbose(string: &str, verbose: &bool) {
+    if *verbose {
+        println!("{}", string)
+    }
+}
+
 fn main() {
     let opt = Opt::from_args();
 
-    if opt.verbose {
-        println!("Verbose is ON");
-    }
-
-    println!(
-        "{:?}",
-        get_command_output("git rev-parse --abbrev-ref HEAD")
-    );
+    print_verbose("Verbose is ON", &opt.verbose);
 
     // Check that the user is in a git repository.
     if !is_inside_working_tree() {
         println!("ERROR: This is not a git directory");
         exit(NOT_A_GIT_REPOSITORY);
     }
+
+    // Get the branch to show in the browser.
+    let branch = match opt.branch {
+        Some(branch) => branch,
+        None => {
+            print_verbose("No branch given, getting current one", &opt.verbose);
+
+            // Get the current branch the user is on.
+            get_command_output("git rev-parse --abbrev-ref HEAD")
+        }
+    };
 
     let remote = get_remote_url();
 
@@ -127,14 +137,14 @@ fn main() {
     let repository = caps.get(2).map_or("", |m| m.as_str());
 
     let url = format!(
-        "https://{domain}/{repository}",
+        "https://{domain}/{repository}/tree/{branch}",
         domain = domain,
-        repository = repository
+        repository = repository,
+        branch = branch
     );
 
-    let key: &str = "BROWSER";
-
-    let browser = match env::var(key) {
+    // Get the browser to use
+    let browser = match env::var("BROWSER") {
         Ok(browser) => browser,
         Err(e) => {
             if opt.verbose {
