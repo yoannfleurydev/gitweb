@@ -1,9 +1,28 @@
 extern crate regex;
+extern crate structopt;
 
 use regex::Regex;
 use std::env;
 use std::process::exit;
 use std::process::Command;
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+// Rename all will use the name of the field
+#[structopt(rename_all = "kebab-case")]
+pub struct Opt {
+    /// Set the branch
+    #[structopt(short, long)]
+    branch: Option<String>,
+
+    /// Set the remote to use
+    #[structopt(short, long)]
+    remote: Option<String>,
+
+    /// Set the verbosity of the command
+    #[structopt(short, long)]
+    verbose: bool,
+}
 
 /**
  * Error list. I do not know if it is the best for Rust to declare constants and
@@ -28,8 +47,7 @@ fn get_command_output(command: &str) -> String {
 
 #[cfg(target_os = "linux")]
 fn run(browser: &str, url: &str) {
-    Command::new("sh")
-        .arg(browser)
+    Command::new(browser)
         .arg(url)
         .output()
         .expect("failed to execute process");
@@ -69,6 +87,17 @@ fn get_remote_url() -> String {
 }
 
 fn main() {
+    let opt = Opt::from_args();
+
+    if opt.verbose {
+        println!("Verbose is ON");
+    }
+
+    println!(
+        "{:?}",
+        get_command_output("git rev-parse --abbrev-ref HEAD")
+    );
+
     // Check that the user is in a git repository.
     if !is_inside_working_tree() {
         println!("ERROR: This is not a git directory");
@@ -91,8 +120,10 @@ fn main() {
 
     let key: &str = "BROWSER";
 
-    match env::var(key) {
-        Ok(browser) => run(browser.as_str(), url.as_str()),
+    let browser = match env::var(key) {
+        Ok(browser) => browser,
         Err(e) => panic!("Couldn't interpret {}: {}", key, e),
-    }
+    };
+
+    run(browser.as_str(), url.as_str());
 }

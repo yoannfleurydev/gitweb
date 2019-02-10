@@ -1,8 +1,10 @@
 [package]
-name = "gitweb-rust"
+name = "gitweb"
 version = "0.1.0"
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
 edition = "2018"
+description = "Open the current remote repository in your browser"
 
 [dependencies]
 regex = "1"
+structopt = { version = "0.2", default-features = false }
