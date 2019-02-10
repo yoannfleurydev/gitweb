@@ -15,6 +15,10 @@ pub struct Opt {
     #[structopt(short, long)]
     branch: Option<String>,
 
+    /// Set the browser
+    #[structopt(short = "-B", long)]
+    browser: Option<String>,
+
     /// Set the remote to use
     #[structopt(short, long)]
     remote: Option<String>,
@@ -53,6 +57,11 @@ fn run(browser: &str, url: &str) {
         .expect("failed to execute process");
 }
 
+#[cfg(target_os = "linux")]
+fn get_default_browser() -> String {
+    String::from("firefox")
+}
+
 #[cfg(target_os = "windows")]
 fn run(browser: &str, url: &str) {
     Command::new("cmd")
@@ -76,6 +85,11 @@ fn get_command_output(command: &str) -> String {
             .trim_end()
             .trim_start(),
     );
+}
+
+#[cfg(target_os = "windows")]
+fn get_default_browser() -> String {
+    String::from("C:\\Program Files\\Mozilla Firefox\\firefox.exe")
 }
 
 fn is_inside_working_tree() -> bool {
@@ -122,7 +136,13 @@ fn main() {
 
     let browser = match env::var(key) {
         Ok(browser) => browser,
-        Err(e) => panic!("Couldn't interpret {}: {}", key, e),
+        Err(e) => {
+            if opt.verbose {
+                println!("{:?}", e)
+            }
+
+            opt.browser.unwrap_or(get_default_browser())
+        }
     };
 
     run(browser.as_str(), url.as_str());
