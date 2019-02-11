@@ -1,3 +1,4 @@
+extern crate open;
 extern crate regex;
 extern crate structopt;
 
@@ -57,11 +58,6 @@ fn run(browser: &str, url: &str) {
         .expect("failed to execute process");
 }
 
-#[cfg(target_os = "linux")]
-fn get_default_browser() -> String {
-    String::from("firefox")
-}
-
 #[cfg(target_os = "windows")]
 fn run(browser: &str, url: &str) {
     Command::new("cmd")
@@ -85,11 +81,6 @@ fn get_command_output(command: &str) -> String {
             .trim_end()
             .trim_start(),
     );
-}
-
-#[cfg(target_os = "windows")]
-fn get_default_browser() -> String {
-    String::from("C:\\Program Files\\Mozilla Firefox\\firefox.exe")
 }
 
 fn is_inside_working_tree() -> bool {
@@ -143,17 +134,33 @@ fn main() {
         branch = branch
     );
 
-    // Get the browser to use
-    let browser = match env::var("BROWSER") {
-        Ok(browser) => browser,
+    // Open the browser.
+    match env::var("BROWSER") {
+        // If the environment variable is available, open the web browser.
+        Ok(browser) => run(browser.as_str(), url.as_str()),
         Err(e) => {
-            if opt.verbose {
-                println!("{:?}", e)
-            }
+            print_verbose(
+                format!("BROWSER variable not available : {}", e).as_str(),
+                &opt.verbose,
+            );
 
-            opt.browser.unwrap_or(get_default_browser())
+            // If the option is available through the command line, open
+            // the given web browser
+            if opt.browser.is_some() {
+                let option_browser = opt.browser.unwrap();
+
+                print_verbose(
+                    format!("Browser {} given as option", option_browser).as_str(),
+                    &opt.verbose,
+                );
+
+                run(option_browser.as_str(), url.as_str());
+            } else {
+                print_verbose("Opening default browser", &opt.verbose);
+
+                // Open the default web browser on the current system.
+                open::that(url);
+            }
         }
     };
-
-    run(browser.as_str(), url.as_str());
 }
