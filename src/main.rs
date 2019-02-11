@@ -51,7 +51,7 @@ fn get_command_output(command: &str) -> String {
 }
 
 #[cfg(target_os = "linux")]
-fn run(browser: &str, url: &str) {
+fn open_browser(browser: &str, url: &str) {
     Command::new(browser)
         .arg(url)
         .output()
@@ -59,10 +59,8 @@ fn run(browser: &str, url: &str) {
 }
 
 #[cfg(target_os = "windows")]
-fn run(browser: &str, url: &str) {
-    Command::new("cmd")
-        .arg("/C")
-        .arg(browser)
+fn open_browser(browser: &str, url: &str) {
+    Command::new(browser)
         .arg(url)
         .output()
         .expect("failed to execute process");
@@ -137,7 +135,7 @@ fn main() {
     // Open the browser.
     match env::var("BROWSER") {
         // If the environment variable is available, open the web browser.
-        Ok(browser) => run(browser.as_str(), url.as_str()),
+        Ok(browser) => open_browser(browser.as_str(), url.as_str()),
         Err(e) => {
             print_verbose(
                 format!("BROWSER variable not available : {}", e).as_str(),
@@ -154,7 +152,7 @@ fn main() {
                     &opt.verbose,
                 );
 
-                run(option_browser.as_str(), url.as_str());
+                open_browser(option_browser.as_str(), url.as_str());
             } else {
                 print_verbose("Opening default browser", &opt.verbose);
 
