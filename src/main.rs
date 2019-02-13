@@ -133,27 +133,27 @@ fn main() {
     );
 
     // Open the browser.
-    match env::var("BROWSER") {
-        // If the environment variable is available, open the web browser.
-        Ok(browser) => open_browser(browser.as_str(), url.as_str()),
-        Err(e) => {
-            print_verbose(
-                format!("BROWSER variable not available : {}", e).as_str(),
-                &opt.verbose,
-            );
+    // If the option is available through the command line, open
+    // the given web browser
+    if opt.browser.is_some() {
+        let option_browser = opt.browser.unwrap();
 
-            // If the option is available through the command line, open
-            // the given web browser
-            if opt.browser.is_some() {
-                let option_browser = opt.browser.unwrap();
+        print_verbose(
+            format!("Browser {} given as option", option_browser).as_str(),
+            &opt.verbose,
+        );
 
+        open_browser(option_browser.as_str(), url.as_str());
+    } else {
+        match env::var("BROWSER") {
+            // If the environment variable is available, open the web browser.
+            Ok(browser) => open_browser(browser.as_str(), url.as_str()),
+            Err(e) => {
                 print_verbose(
-                    format!("Browser {} given as option", option_browser).as_str(),
+                    format!("BROWSER variable not available : {}", e).as_str(),
                     &opt.verbose,
                 );
 
-                open_browser(option_browser.as_str(), url.as_str());
-            } else {
                 print_verbose("Opening default browser", &opt.verbose);
 
                 // Open the default web browser on the current system.

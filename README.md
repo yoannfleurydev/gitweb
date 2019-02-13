@@ -37,7 +37,7 @@ open in the browser.
 
 ## --browser
 
-`gitweb` tries to start one of the following browser (in that order):
+`gitweb` tries to start one of the following browser (in that order of priority):
 
 - `$BROWSER` on Linux 🐧 or `%BROWSER%` on Windows 🏁 (this is a non standard variable)
 - `--browser` option given in the command line
