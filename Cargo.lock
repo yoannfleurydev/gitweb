@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "gitweb"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "open 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
