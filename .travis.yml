@@ -9,3 +9,11 @@ matrix:
   fast_finish: true
 script:
   - cargo build --verbose --all
+deploy:
+  provider: releases
+  api_key:
+    secure: iBL/+YUtTOHeseQQiRKkywPHdUjnX857w/74L/WumdE8w5YbyMra5e723UCGt1YRtz+QtOOVrMWG/XfA1RBqv9Yn0CUbsaMvYhdPmyusyEc59QiE2TQxFrUSnJhm/aj+cXBYdrBqx4qEQLLx4JecDjZZuy/vXc/E1sWqr8Mpicjq9vQHI9EwuiOXiqYw/pUEXZqZKV6Gfc61R1KehBNOhhdOOaJnTsHVJk43yWMLqt+3zT4dinyWgke5TzVVuB3bWawDt+4ubDgakwAStSBGt4SCgSgPfoO5KO2mMhAHvKRkvhojeXpzHSa57x43vEqbNfPkJFL4UTn1Vpzv6OtfHVtW+IdVMqTkRBXh1vHPwC0KGu3EWVlBB2mjSxdySOcUHoCLbzt0hrWg1nqCeECk3kEcrXAostx1Dm79y6Tgb3ReTCFnVDw7LcWJYGrnJyRNrx5yQKQZOaH4gOfF2uEFo7Kr0Of6qsLnu2qh/NpcNTk1JqMavgqEkyCGiG5lZuaG6b9sGkIp3nqWzPtcOyzHC9xCee6aIpUHLdvQEn8obcrpFW9Shcs8Piisi8bH8mWFo1R+KFecsZWn4jxVy1T3hhjtQ6+NSbpY7yt7GsrjcSW0jO8GWT3IjI3uvNp+ckcjF43yrcYSpGavrjrgZXwtH9PgmzleuYFdApTPxXrB9lM=
+  file: target/release/gitweb
+  on:
+    repo: yoannfleurydev/gitweb
+    tags: true
