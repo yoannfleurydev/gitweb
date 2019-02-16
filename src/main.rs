@@ -1,10 +1,11 @@
+extern crate git2;
 extern crate open;
 extern crate regex;
 extern crate structopt;
 
+use git2::{ErrorCode, Repository};
 use regex::Regex;
 use std::env;
-use std::process::exit;
 use std::process::Command;
 use structopt::StructOpt;
 
@@ -29,12 +30,6 @@ pub struct Opt {
     verbose: bool,
 }
 
-/**
- * Error list. I do not know if it is the best for Rust to declare constants and
- * use it after.
- */
-const NOT_A_GIT_REPOSITORY: i32 = 1;
-
 #[cfg(target_os = "linux")]
 fn get_command_output(command: &str) -> String {
     let output = Command::new("sh")
@@ -51,7 +46,7 @@ fn get_command_output(command: &str) -> String {
 }
 
 #[cfg(target_os = "linux")]
-fn open_browser(browser: &str, url: &str) {
+fn open_browser(browser: &String, url: &String) {
     Command::new(browser)
         .arg(url)
         .output()
@@ -59,7 +54,7 @@ fn open_browser(browser: &str, url: &str) {
 }
 
 #[cfg(target_os = "windows")]
-fn open_browser(browser: &str, url: &str) {
+fn open_browser(browser: &String, url: &String) {
     Command::new(browser)
         .arg(url)
         .output()
@@ -81,8 +76,33 @@ fn get_command_output(command: &str) -> String {
     );
 }
 
-fn is_inside_working_tree() -> bool {
-    get_command_output("git rev-parse --is-inside-work-tree") == "true"
+fn get_repo() -> Repository {
+    return match Repository::open(".") {
+        Ok(repo) => repo,
+        Err(e) => panic!("failed to open: {}", e),
+    };
+}
+
+fn get_branch(repo: &Repository, verbose: &bool) -> String {
+    let head = match repo.head() {
+        Ok(head) => Some(head),
+        Err(ref e) if e.code() == ErrorCode::UnbornBranch || e.code() == ErrorCode::NotFound => {
+            None
+        }
+        Err(e) => panic!("failed to get head ref {}", e),
+    };
+
+    let head = head.as_ref().and_then(|h| h.shorthand());
+    print_verbose(
+        format!(
+            "# On branch {}",
+            head.unwrap_or("Not currently on any branch")
+        )
+        .as_str(),
+        verbose,
+    );
+
+    String::from(head.unwrap_or("master"))
 }
 
 fn get_remote_url() -> String {
@@ -96,15 +116,13 @@ fn print_verbose(string: &str, verbose: &bool) {
 }
 
 fn main() {
+    // Get the command line options
     let opt = Opt::from_args();
 
-    print_verbose("Verbose is ON", &opt.verbose);
+    print_verbose("Verbose is active", &opt.verbose);
 
     // Check that the user is in a git repository.
-    if !is_inside_working_tree() {
-        println!("ERROR: This is not a git directory");
-        exit(NOT_A_GIT_REPOSITORY);
-    }
+    let repo = get_repo();
 
     // Get the branch to show in the browser.
     let branch = match opt.branch {
@@ -112,8 +130,7 @@ fn main() {
         None => {
             print_verbose("No branch given, getting current one", &opt.verbose);
 
-            // Get the current branch the user is on.
-            get_command_output("git rev-parse --abbrev-ref HEAD")
+            get_branch(&repo, &opt.verbose)
         }
     };
 
@@ -143,11 +160,11 @@ fn main() {
             &opt.verbose,
         );
 
-        open_browser(option_browser.as_str(), url.as_str());
+        open_browser(&option_browser, &url);
     } else {
         match env::var("BROWSER") {
             // If the environment variable is available, open the web browser.
-            Ok(browser) => open_browser(browser.as_str(), url.as_str()),
+            Ok(browser) => open_browser(&browser, &url),
             Err(e) => {
                 print_verbose(
                     format!("BROWSER variable not available : {}", e).as_str(),
@@ -157,7 +174,10 @@ fn main() {
                 print_verbose("Opening default browser", &opt.verbose);
 
                 // Open the default web browser on the current system.
-                open::that(url);
+                match open::that(url) {
+                    Ok(res) => println!("{:?}", res),
+                    Err(err) => panic!("failed to open the browser : {}", err),
+                }
             }
         }
     };
