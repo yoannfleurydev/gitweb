@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   editorconfig
 -   git2 library to use git wrapper instead of system command
 
+### Removed
+
+-   custom commands to get git information
+
 ## [0.1.1] - 2019-02-16
 
 ### Added

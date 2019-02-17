@@ -31,21 +31,6 @@ pub struct Opt {
 }
 
 #[cfg(target_os = "linux")]
-fn get_command_output(command: &str) -> String {
-    let output = Command::new("sh")
-        .arg("-c")
-        .arg(command)
-        .output()
-        .expect("failed to execute process");
-
-    return String::from(
-        String::from_utf8_lossy(&output.stdout)
-            .trim_end()
-            .trim_start(),
-    );
-}
-
-#[cfg(target_os = "linux")]
 fn open_browser(browser: &String, url: &String) {
     Command::new(browser)
         .arg(url)
@@ -59,21 +44,6 @@ fn open_browser(browser: &String, url: &String) {
         .arg(url)
         .output()
         .expect("failed to execute process");
-}
-
-#[cfg(target_os = "windows")]
-fn get_command_output(command: &str) -> String {
-    let output = Command::new("cmd")
-        .arg("/C")
-        .arg(command)
-        .output()
-        .expect("failed to execute process");
-
-    return String::from(
-        String::from_utf8_lossy(&output.stdout)
-            .trim_end()
-            .trim_start(),
-    );
 }
 
 fn get_repo() -> Repository {
@@ -105,10 +75,6 @@ fn get_branch(repo: &Repository, verbose: &bool) -> String {
     String::from(head.unwrap_or("master"))
 }
 
-fn get_remote_url() -> String {
-    get_command_output("git config --get remote.origin.url")
-}
-
 fn print_verbose(string: &str, verbose: &bool) {
     if *verbose {
         println!("{}", string)
@@ -134,10 +100,25 @@ fn main() {
         }
     };
 
-    let remote = get_remote_url();
+    let remote_name = &opt.remote.unwrap_or("origin".to_string());
+
+    print_verbose(
+        format!("Getting remote for {}", remote_name).as_str(),
+        &opt.verbose,
+    );
+
+    let optional_remote = match repo.find_remote(remote_name) {
+        Ok(remote) => remote,
+        Err(e) => panic!("failed to get remote {}", e),
+    };
+
+    let remote_url = match optional_remote.url() {
+        Some(remote) => remote,
+        None => panic!("no remote available"),
+    };
 
     let re = Regex::new(r".*@(.*):(.*)\.git").unwrap();
-    let caps = re.captures(remote.as_str()).unwrap();
+    let caps = re.captures(remote_url).unwrap();
 
     let domain = caps.get(1).map_or("github.com", |m| m.as_str());
     let repository = caps.get(2).map_or("", |m| m.as_str());
