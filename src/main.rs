@@ -3,11 +3,13 @@ extern crate open;
 extern crate regex;
 extern crate structopt;
 
-use git2::{ErrorCode, Repository};
 use regex::Regex;
 use std::env;
 use std::process::Command;
 use structopt::StructOpt;
+
+mod git;
+mod logger;
 
 #[derive(Debug, StructOpt)]
 // Rename all will use the name of the field
@@ -30,7 +32,7 @@ pub struct Opt {
     verbose: bool,
 }
 
-#[cfg(target_os = "linux")]
+/// Function to open the browser using the system shell.
 fn open_browser(browser: &String, url: &String) {
     Command::new(browser)
         .arg(url)
@@ -38,74 +40,31 @@ fn open_browser(browser: &String, url: &String) {
         .expect("failed to execute process");
 }
 
-#[cfg(target_os = "windows")]
-fn open_browser(browser: &String, url: &String) {
-    Command::new(browser)
-        .arg(url)
-        .output()
-        .expect("failed to execute process");
-}
-
-fn get_repo() -> Repository {
-    return match Repository::open(".") {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to open: {}", e),
-    };
-}
-
-fn get_branch(repo: &Repository, verbose: &bool) -> String {
-    let head = match repo.head() {
-        Ok(head) => Some(head),
-        Err(ref e) if e.code() == ErrorCode::UnbornBranch || e.code() == ErrorCode::NotFound => {
-            None
-        }
-        Err(e) => panic!("failed to get head ref {}", e),
-    };
-
-    let head = head.as_ref().and_then(|h| h.shorthand());
-    print_verbose(
-        format!(
-            "# On branch {}",
-            head.unwrap_or("Not currently on any branch")
-        )
-        .as_str(),
-        verbose,
-    );
-
-    String::from(head.unwrap_or("master"))
-}
-
-fn print_verbose(string: &str, verbose: &bool) {
-    if *verbose {
-        println!("{}", string)
-    }
-}
+const BROWSER: &str = "BROWSER";
 
 fn main() {
     // Get the command line options
     let opt = Opt::from_args();
+    let logger = logger::Logger::new(opt.verbose);
 
-    print_verbose("Verbose is active", &opt.verbose);
+    logger.print("Verbose is active");
 
     // Check that the user is in a git repository.
-    let repo = get_repo();
+    let repo = git::get_repo();
 
     // Get the branch to show in the browser.
     let branch = match opt.branch {
         Some(branch) => branch,
         None => {
-            print_verbose("No branch given, getting current one", &opt.verbose);
+            logger.print("No branch given, getting current one");
 
-            get_branch(&repo, &opt.verbose)
+            git::get_branch(&repo, &logger)
         }
     };
 
-    let remote_name = &opt.remote.unwrap_or("origin".to_string());
+    let remote_name = &opt.remote.unwrap_or("origin".to_owned());
 
-    print_verbose(
-        format!("Getting remote for {}", remote_name).as_str(),
-        &opt.verbose,
-    );
+    logger.print(format!("Getting remote for {}", remote_name).as_str());
 
     let optional_remote = match repo.find_remote(remote_name) {
         Ok(remote) => remote,
@@ -136,23 +95,17 @@ fn main() {
     if opt.browser.is_some() {
         let option_browser = opt.browser.unwrap();
 
-        print_verbose(
-            format!("Browser {} given as option", option_browser).as_str(),
-            &opt.verbose,
-        );
+        logger.print(format!("Browser {} given as option", option_browser).as_str());
 
         open_browser(&option_browser, &url);
     } else {
-        match env::var("BROWSER") {
+        match env::var(BROWSER) {
             // If the environment variable is available, open the web browser.
             Ok(browser) => open_browser(&browser, &url),
+            // Else, open the default browser of the system.
             Err(e) => {
-                print_verbose(
-                    format!("BROWSER variable not available : {}", e).as_str(),
-                    &opt.verbose,
-                );
-
-                print_verbose("Opening default browser", &opt.verbose);
+                logger.print(format!("{} variable not available : {}", BROWSER, e).as_str());
+                logger.print("Opening default browser");
 
                 // Open the default web browser on the current system.
                 match open::that(url) {

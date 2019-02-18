@@ -1,18 +1,19 @@
 language: rust
 rust:
-  - stable
-  - beta
-  - nightly
+    - stable
+    - beta
+    - nightly
 matrix:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
+    allow_failures:
+        - rust: nightly
+    fast_finish: true
 script:
-  - cargo build --release
+    - cargo build --release
 deploy:
-  provider: releases
-  api_key:
-    secure: GV2nTBbjxp3L07ny/W/jpLQvVR8y/q/3BDhrjVV6NsaQxAdWC5Lk79u5UDgY2HYgeGY2wKOrQO31MJF9cmXfxd3gDS+hRkT8HXwIxbqnE6rjAnC+WcJ9cXGF500pUyhtY4OVjOWNexs3q3JwZgqjDjr1MSRZZM+iv+i+I5ug37d53+no1hBv+008/IczC0MrfluqzsR4oJVBDL9Sw9lhATae4YGaC/LFo343pqb204O5xATUg9do/wXnh0DOsrICliLAuDNncBMRwMf0VqG7oTcd9U+ZyGfHLVAPQ2kFAWTQXz6le9H+A6jZfYISiD2Q3HM57xkJ+vR8HZ9M+szF6VV3nvcDzUt93txEkmXOVRlN/r+nirr/wicPQ/SBOhaPiBCg2LZfHocIoMPpuHxq3RPwFFTTb8gldbLfS6Kt7wmgH/i2t4zQzS1qHTsJO50ru6MFwAiZ0va05LcwPKS4C/4anDH4Xd8ViqUAzRcj5uSCX1+obLV37kCMGqRmdSWdLnu8VgKqLWf3OzydcmD4gr8Q67Ak/3BMGSwmOr5l6JPi3itRz4dzFZjksYwaJj6eNWTuuEQnW0ygvGyMNWPfqcNJZM8KxJIuzWHkbgW6uwS29X+Oyq+M7MRvxWh3G6S6KLsrNk+jAWwfXCfQVdCaaAmkOXllKK86qKrh7h634Dk=
-  file: target/release/gitweb
-  on:
-    repo: yoannfleurydev/gitweb
+    provider: releases
+    api_key:
+        secure: GV2nTBbjxp3L07ny/W/jpLQvVR8y/q/3BDhrjVV6NsaQxAdWC5Lk79u5UDgY2HYgeGY2wKOrQO31MJF9cmXfxd3gDS+hRkT8HXwIxbqnE6rjAnC+WcJ9cXGF500pUyhtY4OVjOWNexs3q3JwZgqjDjr1MSRZZM+iv+i+I5ug37d53+no1hBv+008/IczC0MrfluqzsR4oJVBDL9Sw9lhATae4YGaC/LFo343pqb204O5xATUg9do/wXnh0DOsrICliLAuDNncBMRwMf0VqG7oTcd9U+ZyGfHLVAPQ2kFAWTQXz6le9H+A6jZfYISiD2Q3HM57xkJ+vR8HZ9M+szF6VV3nvcDzUt93txEkmXOVRlN/r+nirr/wicPQ/SBOhaPiBCg2LZfHocIoMPpuHxq3RPwFFTTb8gldbLfS6Kt7wmgH/i2t4zQzS1qHTsJO50ru6MFwAiZ0va05LcwPKS4C/4anDH4Xd8ViqUAzRcj5uSCX1+obLV37kCMGqRmdSWdLnu8VgKqLWf3OzydcmD4gr8Q67Ak/3BMGSwmOr5l6JPi3itRz4dzFZjksYwaJj6eNWTuuEQnW0ygvGyMNWPfqcNJZM8KxJIuzWHkbgW6uwS29X+Oyq+M7MRvxWh3G6S6KLsrNk+jAWwfXCfQVdCaaAmkOXllKK86qKrh7h634Dk=
+    file: "target/release/gitweb"
+    on:
+        repo: yoannfleurydev/gitweb
+        tags: true
