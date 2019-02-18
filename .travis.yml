@@ -1,4 +1,7 @@
 language: rust
+os:
+    - windows
+    - linux
 rust:
     - stable
     - beta
@@ -11,9 +14,12 @@ script:
     - cargo build --release
 deploy:
     provider: releases
+    skip_cleanup: true
     api_key:
-        secure: GV2nTBbjxp3L07ny/W/jpLQvVR8y/q/3BDhrjVV6NsaQxAdWC5Lk79u5UDgY2HYgeGY2wKOrQO31MJF9cmXfxd3gDS+hRkT8HXwIxbqnE6rjAnC+WcJ9cXGF500pUyhtY4OVjOWNexs3q3JwZgqjDjr1MSRZZM+iv+i+I5ug37d53+no1hBv+008/IczC0MrfluqzsR4oJVBDL9Sw9lhATae4YGaC/LFo343pqb204O5xATUg9do/wXnh0DOsrICliLAuDNncBMRwMf0VqG7oTcd9U+ZyGfHLVAPQ2kFAWTQXz6le9H+A6jZfYISiD2Q3HM57xkJ+vR8HZ9M+szF6VV3nvcDzUt93txEkmXOVRlN/r+nirr/wicPQ/SBOhaPiBCg2LZfHocIoMPpuHxq3RPwFFTTb8gldbLfS6Kt7wmgH/i2t4zQzS1qHTsJO50ru6MFwAiZ0va05LcwPKS4C/4anDH4Xd8ViqUAzRcj5uSCX1+obLV37kCMGqRmdSWdLnu8VgKqLWf3OzydcmD4gr8Q67Ak/3BMGSwmOr5l6JPi3itRz4dzFZjksYwaJj6eNWTuuEQnW0ygvGyMNWPfqcNJZM8KxJIuzWHkbgW6uwS29X+Oyq+M7MRvxWh3G6S6KLsrNk+jAWwfXCfQVdCaaAmkOXllKK86qKrh7h634Dk=
-    file: "target/release/gitweb"
+        secure: dQsgKbrB3L1YouTeahHSWKdnY2FvLNsZRuxS0swlgg2jhcZbVVNwwU/qqgadiYKgf9B+XBnSvW4lWQgFiMDf2hSw7SE+mXg8e5gXEiZJI+IadCUEvj3GwTGo5TtT/zDb/3KyZvD0X4q8FlzFZE1K+I/BDXy4O/awMsXdS85CCqlEiz16Ao4GFLUtAJrKjLHtl9HCQgGBvJaanxxGMg+E4Bu/CWJYw7ecThIAKZpW20Jyeq8hWgDLnRwfWcRoxRyx1GX0BcVU4BGpXSovHDNpfDIIVpa6OMrZXYDFs0yXXoa7kxvlhf6tKcjrWkTtguczWECEtCP9dJgtqU3YJEE1Wn8q9a0zKKy+1jb1ysCdn+7ExlnphJ91KLMaP5x9O1E2W6bxFNIWy51Tq+19647O8FaNQ81mXSZo7Ao873PrzHW3Bk2xNaEKItSE0mdyV8s+dZJwQBSeD2/3EcMBjfP9IbpJ9ol+yEV3qWZvlcd7mKVi2hokNXh0JkxPJajQJo0S4twRXw8o+Z0okfD7TGBaQJO0oZjJ9691He0SbkEFnF2pYRRp2IndKRUa59sW50Nfip87sSu7SUNBLuKF5K1728bdkp2N9XfSh0WulAkU37nNIno3cgnqt3/ouDZ3735mmVym7KWx7ywLHhzCKjxr84uQDpkEj/t0iDi5Oqt+PXI=
+    file:
+        - "target/release/gitweb"
+        - "target/release/gitweb.exe"
     on:
         repo: yoannfleurydev/gitweb
         tags: true
