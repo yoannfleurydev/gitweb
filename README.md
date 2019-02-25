@@ -14,12 +14,12 @@
 repository.
 
 ```
-gitweb 0.1.0
+gitweb 0.1.3
 Yoann Fleury <yoann.fleury@yahoo.com>
 Open the current remote repository in your browser
 
 USAGE:
-    gitweb.exe [FLAGS] [OPTIONS]
+    gitweb [FLAGS] [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
@@ -29,6 +29,7 @@ FLAGS:
 OPTIONS:
     -b, --branch <branch>      Set the branch
     -B, --browser <browser>    Set the browser
+    -r, --remote <remote>      Set the remote
 ```
 
 ## --branch
@@ -44,3 +45,8 @@ open in the browser.
 - `$BROWSER` on Linux 🐧 or `%BROWSER%` on Windows 🏁 (this is a non standard variable)
 - `--browser` option given in the command line
 - the default web browser on the system
+
+## --remote
+
+`gitweb` will open the origin remote if it exists. You can override the behavior
+by giving the `--remote` flag with the custom remote you want to open.
