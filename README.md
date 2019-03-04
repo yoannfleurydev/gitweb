@@ -14,7 +14,7 @@
 repository.
 
 ```
-gitweb 0.1.3
+gitweb 0.1.4
 Yoann Fleury <yoann.fleury@yahoo.com>
 Open the current remote repository in your browser
 

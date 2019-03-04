@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2019-03-04
+
+### Fixed
+
+- now able to use gitweb in git repository subdirectories
+
 ## [0.1.3] - 2019-02-18
 
 ### Added
@@ -15,30 +21,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   editorconfig
--   git2 library to use git wrapper instead of system command
+- editorconfig
+- git2 library to use git wrapper instead of system command
 
 ### Removed
 
--   custom commands to get git information
+- custom commands to get git information
 
 ## [0.1.1] - 2019-02-16
 
 ### Added
 
--   this changelog
--   build status
+- this changelog
+- build status
 
 ### Changed
 
--   set default browser as the first to be open
--   allow `$BROWSER` to override the default browser of the system
--   allow `--browser` to override the `$BROWSER` environment variable and the default browser
+- set default browser as the first to be open
+- allow `$BROWSER` to override the default browser of the system
+- allow `--browser` to override the `$BROWSER` environment variable and the default browser
 
 ## [0.1.0] - 2019-02-13
 
 ### Added
 
--   default behavior of the command is to open the current repository in the browser
--   add `--branch` option to open a custom branch (default behavior is the current branch of the repo)
--   add `--browser` to open a custom browser
+- default behavior of the command is to open the current repository in the browser
+- add `--branch` option to open a custom branch (default behavior is the current branch of the repo)
+- add `--browser` to open a custom browser
+
+[0.1.4]: https://github.com/yoannfleurydev/gitweb/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/yoannfleurydev/gitweb/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/yoannfleurydev/gitweb/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/yoannfleurydev/gitweb/compare/v0.1.0...v0.1.1

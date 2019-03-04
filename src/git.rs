@@ -2,7 +2,7 @@ use crate::logger::Logger;
 use git2::{ErrorCode, Repository};
 
 pub fn get_repo() -> Repository {
-    return match Repository::open(".") {
+    return match Repository::discover(".") {
         Ok(repo) => repo,
         Err(e) => panic!("failed to open: {}", e),
     };
