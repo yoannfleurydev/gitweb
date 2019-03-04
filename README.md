@@ -8,6 +8,8 @@
 
 `gitweb` is a command line interface I created mainly to learn Rust.
 
+![preview](./docs/preview.gif)
+
 ## Usage
 
 `gitweb` will by default open the remote in the browser of the current
