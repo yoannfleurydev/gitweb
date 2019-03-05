@@ -11,5 +11,5 @@ license = "Apache-2.0"
 [dependencies]
 regex = "1"
 structopt = { version = "0.2", default-features = false }
-open = "*"
+open = "1.2.2"
 git2 = "0.8"
