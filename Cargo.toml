@@ -6,6 +6,7 @@ edition = "2018"
 description = "Open the current remote repository in your browser"
 repository = "https://github.com/yoannfleurydev/gitweb"
 homepage = "https://github.com/yoannfleurydev/gitweb"
+license = "Apache-2.0"
 
 [dependencies]
 regex = "1"
