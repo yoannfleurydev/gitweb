@@ -4,6 +4,8 @@ version = "0.1.4"
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
 edition = "2018"
 description = "Open the current remote repository in your browser"
+repository = "https://github.com/yoannfleurydev/gitweb"
+homepage = "https://github.com/yoannfleurydev/gitweb"
 
 [dependencies]
 regex = "1"
