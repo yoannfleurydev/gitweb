@@ -36,7 +36,7 @@ pub struct Opt {
 fn open_browser(browser: &String, url: &String) {
     Command::new(browser)
         .arg(url)
-        .output()
+        .spawn()
         .expect("failed to execute process");
 }
 
@@ -108,7 +108,7 @@ fn main() {
                 logger.print("Opening default browser");
 
                 // Open the default web browser on the current system.
-                match open::that(url) {
+                match open::that(&url) {
                     Ok(res) => println!("{:?}", res),
                     Err(err) => panic!("failed to open the browser : {}", err),
                 }
