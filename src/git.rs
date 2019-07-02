@@ -1,11 +1,8 @@
 use crate::logger::Logger;
-use git2::{ErrorCode, Repository};
+use git2::{ErrorCode, Repository, Error};
 
-pub fn get_repo() -> Repository {
-    return match Repository::discover(".") {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to open: {}", e),
-    };
+pub fn get_repo() -> Result<Repository, Error> {
+    Repository::discover(".")
 }
 
 pub fn get_branch(repo: &Repository, logger: &Logger) -> String {
@@ -18,7 +15,7 @@ pub fn get_branch(repo: &Repository, logger: &Logger) -> String {
     };
 
     let head = head.as_ref().and_then(|h| h.shorthand());
-    logger.print(
+    logger.verbose_print(
         format!(
             "# On branch {}",
             head.unwrap_or("Not currently on any branch")

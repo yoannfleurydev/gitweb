@@ -1,6 +1,6 @@
 [package]
 name = "gitweb"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
 edition = "2018"
 description = "Open the current remote repository in your browser"
@@ -10,6 +10,6 @@ license = "Apache-2.0"
 
 [dependencies]
 regex = "1"
-structopt = { version = "0.2", default-features = false }
-open = "1.2.2"
-git2 = "0.8"
+structopt = "0.2"
+open = "1.2"
+git2 = "0.9"

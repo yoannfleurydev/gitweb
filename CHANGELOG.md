@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2019-07-02
+
+### Added
+
+- no more panic 💥, now the program exit smoothly on errors
+- each error has its own code
+- [yoannfleurydev.github.io/gitweb](https://yoannfleurydev.github.io/gitweb)
+
+### Changed
+
+- add more comment for the `--help` option.
+- add `print` function to output easily when the program is in error
+- renamed the old `print` method to `verbose_print` so the logger write only
+  on verbose run
+- improve browser openning readability by removing ifs
+
+### Security
+
+- fix all dependency on their minor release to have the latest ones
+
 ## [0.1.5] - 2019-07-01
 
 ### Fixed
@@ -21,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   working CI
+- working CI
 
 ## [0.1.2] - 2019-02-17
 

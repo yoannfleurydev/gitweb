@@ -7,9 +7,13 @@ impl Logger {
         Logger { verbose: verbose }
     }
 
-    pub fn print(&self, text: &str) {
+    pub fn verbose_print(&self, text: &str) {
         if self.verbose {
-            println!("gitweb: {}", text)
+            println!("gitweb: {}", text);
         }
+    }
+
+    pub fn print(&self, text: &str) {
+        println!("{}", text);
     }
 }

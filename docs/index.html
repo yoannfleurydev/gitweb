@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+    </head>
+    <body>
+        <h1 id="gitweb">gitweb</h1>
+        <p>
+            <a href="https://travis-ci.com/yoannfleurydev/gitweb#"
+                ><embed
+                    src="https://travis-ci.com/yoannfleurydev/gitweb.svg?branch=master"
+            /></a>
+        </p>
+        <blockquote>
+            <p>
+                💡 This README is in a 🚧 WIP 🚧 status like all the code in
+                this repository. Some of the flags and options are subject to
+                change in the future. Ideas are welcome. Ideas are bulletproof
+                (V).
+            </p>
+        </blockquote>
+        <p>
+            <code>gitweb</code> is a command line interface I created mainly to
+            learn Rust.
+        </p>
+        <div class="figure">
+            <img src="./preview.gif" alt="preview" />
+            <p class="caption">preview</p>
+        </div>
+        <h2 id="usage">Usage</h2>
+        <p>
+            <code>gitweb</code> will by default open the remote in the browser
+            of the current repository.
+        </p>
+        <pre><code>gitweb 0.1.5
+Yoann Fleury &lt;yoann.fleury@yahoo.com&gt;
+Open the current remote repository in your browser
+
+USAGE:
+    gitweb [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+    -v, --verbose    Set the verbosity of the command
+
+OPTIONS:
+    -b, --branch &lt;branch&gt;      Set the branch
+    -B, --browser &lt;browser&gt;    Set the browser
+    -r, --remote &lt;remote&gt;      Set the remote</code></pre>
+        <h2 id="branch">--branch</h2>
+        <p>
+            <code>gitweb</code> will open the current branch on the remote
+            repository. You can override the behavior by giving the
+            <code>--branch</code> flag with the custom branch you want to open
+            in the browser.
+        </p>
+        <h2 id="browser">--browser</h2>
+        <p>
+            <code>gitweb</code> tries to start one of the following browser (in
+            that order of priority):
+        </p>
+        <ul>
+            <li><code>--browser</code> option given in the command line</li>
+            <li>
+                <code>$BROWSER</code> on Linux 🐧 or <code>%BROWSER%</code> on
+                Windows 🏁 (this is a non standard variable)
+            </li>
+            <li>the default web browser on the system</li>
+        </ul>
+        <h2 id="remote">--remote</h2>
+        <p>
+            <code>gitweb</code> will open the origin remote if it exists. You
+            can override the behavior by giving the <code>--remote</code> flag
+            with the custom remote you want to open.
+        </p>
+    </body>
+</html>
