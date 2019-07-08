@@ -56,6 +56,18 @@ fn open_browser(browser: &String, url: &String) -> Result<Child> {
         .spawn()
 }
 
+/// Function to remove the port if there is any.
+fn format_repository(string: &str) -> String {
+    let mut splits = string.split("/").collect::<Vec<&str>>();
+
+    if splits.len() > 2 {
+        // Removing port
+        splits.remove(0);
+    }
+
+    splits.join("/")
+}
+
 const BROWSER: &str = "BROWSER";
 const DEFAULT_REMOTE: &str = "origin";
 
@@ -120,7 +132,7 @@ fn main() {
     let caps = re.captures(remote_url).unwrap();
 
     let domain = caps.get(1).map_or("github.com", |m| m.as_str());
-    let repository = caps.get(2).map_or("", |m| m.as_str());
+    let repository = format_repository(caps.get(2).map_or("", |m| m.as_str()));
 
     let url = format!(
         "https://{domain}/{repository}/tree/{branch}",
