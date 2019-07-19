@@ -32,6 +32,8 @@ pub struct Opt {
     /// the command line, then the environment variable $BROWSER on Linux or
     /// %BROWSER% on Windows (this is a non standard variable), then the default
     /// web browser on the system
+    /// If you give an empty string to browser option, the program will only
+    /// print the remote URL into the stdout.
     #[structopt(short = "-B", long)]
     browser: Option<String>,
 
