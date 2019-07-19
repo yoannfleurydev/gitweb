@@ -3,11 +3,11 @@ extern crate open;
 extern crate regex;
 extern crate structopt;
 
-use std::io::Result;
 use regex::Regex;
 use std::env;
-use std::process::{Command,Child};
+use std::io::Result;
 use std::process::exit;
+use std::process::{Child, Command};
 use structopt::StructOpt;
 
 mod git;
@@ -31,7 +31,7 @@ pub struct Opt {
     /// Here is the list by order of overrides: the --browser option given in
     /// the command line, then the environment variable $BROWSER on Linux or
     /// %BROWSER% on Windows (this is a non standard variable), then the default
-    /// web browser on the syste
+    /// web browser on the system
     #[structopt(short = "-B", long)]
     browser: Option<String>,
 
@@ -51,9 +51,7 @@ pub struct Opt {
 
 /// Function to open the browser using the system shell.
 fn open_browser(browser: &String, url: &String) -> Result<Child> {
-    Command::new(browser)
-        .arg(url)
-        .spawn()
+    Command::new(browser).arg(url).spawn()
 }
 
 /// Function to remove the port if there is any.
@@ -78,7 +76,7 @@ enum ExitCode {
     NoRemoteMatching,
     NoRemoteAvailable,
     NotAbleToOpenSystemBrowser,
-    BrowserNotAvailable
+    BrowserNotAvailable,
 }
 
 fn main() {
@@ -117,7 +115,7 @@ fn main() {
         Err(_) => {
             logger.print(format!("No remote found for remote {}", remote_name).as_str());
             exit(ExitCode::NoRemoteMatching as i32);
-        },
+        }
     };
 
     let remote_url = match optional_remote.url() {
@@ -146,29 +144,38 @@ fn main() {
         Some(option_browser) => {
             logger.verbose_print(format!("Browser {} given as option", option_browser).as_str());
 
+            if option_browser == "" {
+                println!("{}", url);
+                exit(ExitCode::Success as i32);
+            }
+
             if open_browser(&option_browser, &url).is_err() {
-                logger.print(format!("Unable to open the given browser: {}", option_browser).as_str());
+                logger.print(
+                    format!("Unable to open the given browser: {}", option_browser).as_str(),
+                );
                 exit(ExitCode::BrowserNotAvailable as i32);
             };
-        },
+        }
         None => {
             match env::var(BROWSER) {
                 // If the environment variable is available, open the web browser.
                 Ok(browser) => {
                     if open_browser(&browser, &url).is_err() {
-                        logger.print(format!("Unable to open the given browser: {}", browser).as_str());
+                        logger.print(
+                            format!("Unable to open the given browser: {}", browser).as_str(),
+                        );
                         exit(ExitCode::BrowserNotAvailable as i32);
                     }
-                },
+                }
                 // Else, open the default browser of the system.
                 Err(e) => {
-                    logger.verbose_print(format!("{} variable not available : {}", BROWSER, e).as_str());
+                    logger.verbose_print(
+                        format!("{} variable not available : {}", BROWSER, e).as_str(),
+                    );
 
                     // Open the default web browser on the current system.
                     match open::that(&url) {
-                        Ok(_) => {
-                            logger.verbose_print("Default browser is now open")
-                        },
+                        Ok(_) => logger.verbose_print("Default browser is now open"),
                         Err(_) => {
                             logger.print("Error while openning the default OS browser");
                             exit(ExitCode::NotAbleToOpenSystemBrowser as i32);
