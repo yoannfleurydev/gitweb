@@ -6,6 +6,9 @@ edition = "2018"
 description = "Open the current remote repository in your browser"
 repository = "https://github.com/yoannfleurydev/gitweb"
 homepage = "https://github.com/yoannfleurydev/gitweb"
+readme = "README.md"
+keywords = ["git", "browser"]
+categories = ["command-line-utilities"]
 license = "Apache-2.0"
 exclude = [
     "docs/",
