@@ -4,13 +4,15 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>Document</title>
+        <link rel="stylesheet" href="style.css" />
+        <title>🌲 gitweb</title>
     </head>
-    <body>
-        <h1 id="gitweb">gitweb</h1>
-        <p>
-            <a href="https://travis-ci.com/yoannfleurydev/gitweb#"
-                ><embed
+    <body class="m-4">
+        <h1 id="gitweb" class="text-6xl text-center text-blue-900">gitweb</h1>
+        <p class="mb-4">
+            <a href="https://travis-ci.com/yoannfleurydev/gitweb">
+                <embed
+                    class="mx-auto"
                     src="https://travis-ci.com/yoannfleurydev/gitweb.svg?branch=master"
             /></a>
         </p>
@@ -27,15 +29,20 @@
             learn Rust.
         </p>
         <div class="figure">
-            <img src="./preview.gif" alt="preview" />
-            <p class="caption">preview</p>
+            <img
+                class="rounded-lg shadow sm:w-full lg:w-1/2 mx-auto"
+                src="./preview.gif"
+                alt="preview"
+            />
         </div>
-        <h2 id="usage">Usage</h2>
+        <h2 class="text-4xl text-blue-900" id="usage">Usage</h2>
         <p>
             <code>gitweb</code> will by default open the remote in the browser
             of the current repository.
         </p>
-        <pre><code>gitweb 0.1.5
+        <pre
+            class="bg-blue-900 text-white rounded-lg sm:w-full md:w-4/5 mx-auto p-1"
+        ><code>gitweb 0.1.5
 Yoann Fleury &lt;yoann.fleury@yahoo.com&gt;
 Open the current remote repository in your browser
 
@@ -50,15 +57,16 @@ FLAGS:
 OPTIONS:
     -b, --branch &lt;branch&gt;      Set the branch
     -B, --browser &lt;browser&gt;    Set the browser
-    -r, --remote &lt;remote&gt;      Set the remote</code></pre>
-        <h2 id="branch">--branch</h2>
+    -r, --remote &lt;remote&gt;      Set the remote
+</code></pre>
+        <h2 class="text-4xl text-blue-900" id="branch">--branch</h2>
         <p>
             <code>gitweb</code> will open the current branch on the remote
             repository. You can override the behavior by giving the
             <code>--branch</code> flag with the custom branch you want to open
             in the browser.
         </p>
-        <h2 id="browser">--browser</h2>
+        <h2 class="text-4xl text-blue-900" id="browser">--browser</h2>
         <p>
             <code>gitweb</code> tries to start one of the following browser (in
             that order of priority):
@@ -71,7 +79,7 @@ OPTIONS:
             </li>
             <li>the default web browser on the system</li>
         </ul>
-        <h2 id="remote">--remote</h2>
+        <h2 class="text-4xl text-blue-900" id="remote">--remote</h2>
         <p>
             <code>gitweb</code> will open the origin remote if it exists. You
             can override the behavior by giving the <code>--remote</code> flag
