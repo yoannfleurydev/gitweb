@@ -16,6 +16,6 @@ exclude = [
 
 [dependencies]
 regex = "1"
-structopt = "0.2"
-open = "1.2"
-git2 = "0.9"
+structopt = "0.3"
+open = "1.4"
+git2 = "0.13"

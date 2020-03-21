@@ -7,41 +7,37 @@
         <link rel="stylesheet" href="style.css" />
         <title>🌲 gitweb</title>
     </head>
-    <body class="m-4">
+    <body class="mx-auto w-10/12 lg:w-6/12 bg-gray-100">
         <h1 id="gitweb" class="text-6xl text-center text-blue-900">gitweb</h1>
         <p class="mb-4">
-            <a href="https://travis-ci.com/yoannfleurydev/gitweb">
-                <embed
-                    class="mx-auto"
-                    src="https://travis-ci.com/yoannfleurydev/gitweb.svg?branch=master"
-            /></a>
+            <a class="mx-auto" href="https://travis-ci.com/yoannfleurydev/gitweb#" rel="nofollow">
+                <img src="https://camo.githubusercontent.com/8940ac149c91fab6f250d28539393a8520cad1ee/68747470733a2f2f7472617669732d63692e636f6d2f796f616e6e666c657572796465762f6769747765622e7376673f6272616e63683d6d6173746572" alt="Build Status" data-canonical-src="https://travis-ci.com/yoannfleurydev/gitweb.svg?branch=master" style="max-width:100%;">
+            </a>
         </p>
-        <blockquote>
-            <p>
-                💡 This README is in a 🚧 WIP 🚧 status like all the code in
-                this repository. Some of the flags and options are subject to
-                change in the future. Ideas are welcome. Ideas are bulletproof
-                (V).
-            </p>
-        </blockquote>
+        <p>
+            💡 This README is in a 🚧 WIP 🚧 status like all the code in
+            this repository. Some of the flags and options are subject to
+            change in the future. Ideas are welcome. Ideas are bulletproof
+            (V).
+        </p>
         <p>
             <code>gitweb</code> is a command line interface I created mainly to
             learn Rust.
         </p>
         <div class="figure">
             <img
-                class="rounded-lg shadow sm:w-full lg:w-1/2 mx-auto"
+                class="rounded-lg shadow sm:w-full mx-auto"
                 src="./preview.gif"
-                alt="preview"
+                alt="Command Preview"
             />
         </div>
         <h2 class="text-4xl text-blue-900" id="usage">Usage</h2>
-        <p>
+        <p class="mb-4">
             <code>gitweb</code> will by default open the remote in the browser
             of the current repository.
         </p>
         <pre
-            class="bg-blue-900 text-white rounded-lg sm:w-full md:w-4/5 mx-auto p-1"
+            class="bg-blue-900 text-white rounded-lg sm:w-full mx-auto p-1"
         ><code>gitweb 0.1.5
 Yoann Fleury &lt;yoann.fleury@yahoo.com&gt;
 Open the current remote repository in your browser
