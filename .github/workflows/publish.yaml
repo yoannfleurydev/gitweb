@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  push:
+    tags:
+     - '*'
+
+jobs:
+  release_linux:
+    name: Linux Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Linux Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+      - name: Linux Package
+        uses: actions-rs/cargo@v1
+        with:
+          command: package
+      - name: Login to crates.io
+        uses: actions-rs/cargo@v1
+        with:
+          command: login
+          args: ${{ secrets.CRATES_IO_TOKEN_GITWEB }}
+      - name: Package the crate
+        uses: actions-rs/cargo@v1
+        with:
+          command: package
+      - name: Publish the crate
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+      - name: Release Linux binary
+        uses: meeDamian/github-release@1.0
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: gitweb:target/release/gitweb
+          token: ${{ secrets.GITHUB_TOKEN }}

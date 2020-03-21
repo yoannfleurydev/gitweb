@@ -12,6 +12,9 @@ categories = ["command-line-utilities"]
 license = "Apache-2.0"
 exclude = [
     "docs/",
+    ".editorconfig",
+    ".github/",
+    "*.md"
 ]
 
 [dependencies]

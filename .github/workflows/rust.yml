@@ -1,6 +1,9 @@
-name: Rust
+name: Build & Test
 
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
 
 jobs:
   build_linux:
