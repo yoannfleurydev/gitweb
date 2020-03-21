@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.com/yoannfleurydev/gitweb.svg?branch=master)](https://travis-ci.com/yoannfleurydev/gitweb#)
 
-> 💡 This README is in a 🚧 WIP 🚧 status like all the code in this repository.
 > Some of the flags and options are subject to change in the future.
 > Ideas are welcome. Ideas are bulletproof (V).
 
@@ -16,12 +15,10 @@
 repository.
 
 ```
-gitweb 0.1.5
-Yoann Fleury <yoann.fleury@yahoo.com>
-Open the current remote repository in your browser
+gitweb 0.1.10
 
 USAGE:
-    gitweb [FLAGS] [OPTIONS]
+    gitweb.exe [FLAGS] [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
