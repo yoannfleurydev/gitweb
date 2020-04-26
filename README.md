@@ -27,7 +27,7 @@ Download the binary from the [latest release](https://github.com/yoannfleurydev/
 repository.
 
 ```
-gitweb 0.1.10
+gitweb 0.1.11
 
 USAGE:
     gitweb.exe [FLAGS] [OPTIONS]

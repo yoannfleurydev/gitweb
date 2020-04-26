@@ -12,55 +12,25 @@ use structopt::StructOpt;
 
 mod git;
 mod logger;
-
-#[derive(Debug, StructOpt)]
-// Rename all will use the name of the field
-#[structopt(rename_all = "kebab-case")]
-pub struct Opt {
-    /// Set the branch
-    ///
-    /// By setting the branch, you can override the default behavior that will
-    /// set the branch to the current one in the repository. If something went
-    /// wrong with the current one, it will set the value to master.
-    #[structopt(short, long)]
-    branch: Option<String>,
-
-    /// Set the browser
-    ///
-    /// If you set the browser option, it will override the other configuration.
-    /// Here is the list by order of overrides: the --browser option given in
-    /// the command line, then the environment variable $BROWSER on Linux or
-    /// %BROWSER% on Windows (this is a non standard variable), then the default
-    /// web browser on the system
-    /// If you give an empty string to browser option, the program will only
-    /// print the remote URL into the stdout.
-    #[structopt(short = "-B", long)]
-    browser: Option<String>,
-
-    /// Set the remote
-    ///
-    /// By default, the selected remote will be origin by convention. You can
-    /// override this setting by  using this option.
-    #[structopt(short, long)]
-    remote: Option<String>,
-
-    /// Set the verbosity of the command
-    ///
-    /// By settings this option, you will have more feedback on the output.
-    #[structopt(short, long)]
-    verbose: bool,
-}
+mod options;
 
 /// Function to open the browser using the system shell.
 fn open_browser(browser: &String, url: &String) -> Result<Child> {
     Command::new(browser).arg(url).spawn()
 }
 
+/// Check if the given parameter is a port.
+fn is_port(string: &str) -> bool {
+    let re = Regex::new(r"^:\d{1,5}$").unwrap();
+
+    re.is_match(string)
+}
+
 /// Function to remove the port if there is any.
-fn format_repository(string: &str) -> String {
+fn remove_port(string: &str) -> String {
     let mut splits = string.split("/").collect::<Vec<&str>>();
 
-    if splits.len() > 2 {
+    if splits.len() > 2 && is_port(splits[0]) {
         // Removing port
         splits.remove(0);
     }
@@ -83,7 +53,7 @@ enum ExitCode {
 
 fn main() {
     // Get the command line options
-    let opt = Opt::from_args();
+    let opt = options::Opt::from_args();
     let logger = logger::Logger::new(opt.verbose);
     logger.verbose_print("Verbose is active");
 
@@ -132,7 +102,7 @@ fn main() {
     let caps = re.captures(remote_url).unwrap();
 
     let domain = caps.get(1).map_or("github.com", |m| m.as_str());
-    let repository = format_repository(caps.get(2).map_or("", |m| m.as_str()));
+    let repository = remove_port(caps.get(2).map_or("", |m| m.as_str()));
 
     let url = format!(
         "https://{domain}/{repository}/tree/{branch}",
@@ -189,4 +159,26 @@ fn main() {
     }
 
     exit(ExitCode::Success as i32);
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn test_is_port() {
+        assert!(is_port(":80"));
+    }
+
+    #[test]
+    fn test_is_not_port_it_is_a_path() {
+        assert!(!is_port("/not_a_port"))
+    }
+
+    #[test]
+    fn test_is_not_a_port_too_many_digits() {
+        assert!(!is_port(":999999"))
+    }
+
 }
