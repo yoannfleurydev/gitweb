@@ -4,7 +4,7 @@ pub struct Logger {
 
 impl Logger {
     pub fn new(verbose: bool) -> Logger {
-        Logger { verbose: verbose }
+        Logger { verbose }
     }
 
     pub fn verbose_print(&self, text: &str) {

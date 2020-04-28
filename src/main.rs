@@ -15,7 +15,7 @@ mod logger;
 mod options;
 
 /// Function to open the browser using the system shell.
-fn open_browser(browser: &String, url: &String) -> Result<Child> {
+fn open_browser(browser: &str, url: &str) -> Result<Child> {
     Command::new(browser).arg(url).spawn()
 }
 
@@ -28,7 +28,7 @@ fn is_port(string: &str) -> bool {
 
 /// Function to remove the port if there is any.
 fn remove_port(string: &str) -> String {
-    let mut splits = string.split("/").collect::<Vec<&str>>();
+    let mut splits = string.split('/').collect::<Vec<&str>>();
 
     if splits.len() > 2 && is_port(splits[0]) {
         // Removing port
@@ -78,7 +78,7 @@ fn main() {
         }
     };
 
-    let remote_name = &opt.remote.unwrap_or(String::from(DEFAULT_REMOTE));
+    let remote_name = &opt.remote.unwrap_or_else(|| String::from(DEFAULT_REMOTE));
 
     logger.verbose_print(format!("Getting remote for {}", remote_name).as_str());
 
