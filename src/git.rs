@@ -1,6 +1,7 @@
 use crate::logger::Logger;
-use git2::{ErrorCode, Repository, Error};
+use git2::{Error, ErrorCode, Repository};
 
+/// Get the current repository.
 pub fn get_repo() -> Result<Repository, Error> {
     Repository::discover(".")
 }

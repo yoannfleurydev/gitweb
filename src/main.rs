@@ -19,27 +19,19 @@ fn open_browser(browser: &str, url: &str) -> Result<Child> {
     Command::new(browser).arg(url).spawn()
 }
 
-/// Check if the given parameter is a port.
-fn is_port(string: &str) -> bool {
-    let re = Regex::new(r"^:\d{1,5}$").unwrap();
+fn get_remote_parts(url: &str) -> Result<(&str, &str)> {
+    let re =
+        Regex::new(r"((\w+://)|(git@))(.+@)*([\w\d\.]+)(:[\d]+){0,1}/*(:?)(.*)\.git/?").unwrap();
+    let caps = re.captures(url).unwrap();
 
-    re.is_match(string)
-}
+    let domain = caps.get(5).map_or("github.com", |m| m.as_str());
+    let repository = caps.get(8).map_or("", |m| m.as_str());
 
-/// Function to remove the port if there is any.
-fn remove_port(string: &str) -> String {
-    let mut splits = string.split('/').collect::<Vec<&str>>();
-
-    if splits.len() > 2 && is_port(splits[0]) {
-        // Removing port
-        splits.remove(0);
-    }
-
-    splits.join("/")
+    Ok((domain, repository))
 }
 
 const BROWSER: &str = "BROWSER";
-const DEFAULT_REMOTE: &str = "origin";
+const DEFAULT_REMOTE_ORIGIN: &str = "origin";
 
 /// Enumeration to store exit codes. The first one, Success is by default set to 0
 enum ExitCode {
@@ -78,7 +70,9 @@ fn main() {
         }
     };
 
-    let remote_name = &opt.remote.unwrap_or_else(|| String::from(DEFAULT_REMOTE));
+    let remote_name = &opt
+        .remote
+        .unwrap_or_else(|| String::from(DEFAULT_REMOTE_ORIGIN));
 
     logger.verbose_print(format!("Getting remote for {}", remote_name).as_str());
 
@@ -98,16 +92,12 @@ fn main() {
         }
     };
 
-    let re = Regex::new(r".*@(.*):(.*)\.git").unwrap();
-    let caps = re.captures(remote_url).unwrap();
-
-    let domain = caps.get(1).map_or("github.com", |m| m.as_str());
-    let repository = remove_port(caps.get(2).map_or("", |m| m.as_str()));
+    let parts = get_remote_parts(remote_url).unwrap();
 
     let url = format!(
         "https://{domain}/{repository}/tree/{branch}",
-        domain = domain,
-        repository = repository,
+        domain = parts.0,
+        repository = parts.1,
         branch = branch
     );
 
@@ -167,18 +157,44 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_is_port() {
-        assert!(is_port(":80"));
+    fn test_without_ssh_git_url_parts() {
+        let parts = get_remote_parts("git@github.com:yoannfleurydev/gitweb.git").unwrap();
+
+        assert_eq!(parts.0, "github.com");
+        assert_eq!(parts.1, "yoannfleurydev/gitweb");
     }
 
     #[test]
-    fn test_is_not_port_it_is_a_path() {
-        assert!(!is_port("/not_a_port"))
+    fn test_with_ssh_and_multiple_subgroups_git_url_parts() {
+        let parts =
+            get_remote_parts("ssh://git@gitlab.com/group/subgroup/subsubgroup/design-system.git")
+                .unwrap();
+
+        assert_eq!(parts.0, "gitlab.com");
+        assert_eq!(parts.1, "group/subgroup/subsubgroup/design-system");
     }
 
     #[test]
-    fn test_is_not_a_port_too_many_digits() {
-        assert!(!is_port(":999999"))
+    fn test_with_ssh_and_port_git_url_parts() {
+        let parts = get_remote_parts("ssh://user@host.xz:22/path/to/repo.git/").unwrap();
+
+        assert_eq!(parts.0, "host.xz");
+        assert_eq!(parts.1, "path/to/repo");
     }
 
+    #[test]
+    fn test_with_http_and_port_git_url_parts() {
+        let parts = get_remote_parts("http://host.xz:80/path/to/repo.git/").unwrap();
+
+        assert_eq!(parts.0, "host.xz");
+        assert_eq!(parts.1, "path/to/repo");
+    }
+
+    #[test]
+    fn test_with_http_git_url_parts() {
+        let parts = get_remote_parts("https://host.xz/path/to/repo.git/").unwrap();
+
+        assert_eq!(parts.0, "host.xz");
+        assert_eq!(parts.1, "path/to/repo");
+    }
 }
