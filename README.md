@@ -1,6 +1,6 @@
 # gitweb
 
-![Build & Test](https://github.com/yoannfleurydev/gitweb/workflows/Build%20&%20Test/badge.svg)
+![Publish](https://github.com/yoannfleurydev/gitweb/workflows/Publish/badge.svg)
 
 > Some of the flags and options are subject to change in the future.
 > Ideas are welcome. Ideas are bulletproof (V).
