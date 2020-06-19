@@ -14,6 +14,13 @@ pub struct Opt {
     #[structopt(short, long)]
     pub branch: Option<String>,
 
+    /// Set a commit
+    ///
+    /// By setting a commit, you can override the default behavior that will
+    /// set the branch to the current one in the repository.
+    #[structopt(short, long)]
+    pub commit: Option<String>,
+
     /// Set the browser
     ///
     /// If you set the browser option, it will override the other configuration.

@@ -32,6 +32,7 @@ fn get_remote_parts(url: &str) -> Result<(&str, &str)> {
 
 const BROWSER: &str = "BROWSER";
 const DEFAULT_REMOTE_ORIGIN: &str = "origin";
+const BITBUCKET_HOSTNAME: &str = "bitbucket.org";
 
 /// Enumeration to store exit codes. The first one, Success is by default set to 0
 enum ExitCode {
@@ -94,12 +95,23 @@ fn main() {
 
     let parts = get_remote_parts(remote_url).unwrap();
 
-    let url = format!(
-        "https://{domain}/{repository}/tree/{branch}",
-        domain = parts.0,
-        repository = parts.1,
-        branch = branch
-    );
+    let url = if let Some(commit) = opt.commit {
+        format!(
+            "https://{domain}/{repository}/{path}/{commit}",
+            domain = parts.0,
+            path = if parts.0 == BITBUCKET_HOSTNAME {"commits"} else {"commit"},
+            repository = parts.1,
+            commit = commit
+        )
+    } else {
+        format!(
+            "https://{domain}/{repository}/{path}/{branch}",
+            domain = parts.0,
+            path = if parts.0 == BITBUCKET_HOSTNAME {"src"} else {"tree"},
+            repository = parts.1,
+            branch = branch
+        )
+    };
 
     // If the option is available through the command line, open the given one
     match opt.browser {
