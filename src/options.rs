@@ -6,13 +6,21 @@ use structopt::StructOpt;
 // Rename all will use the name of the field
 #[structopt(rename_all = "kebab-case")]
 pub struct Opt {
-    /// Set the branch
+    /// Set the branch (alias for --tag)
     ///
     /// By setting the branch, you can override the default behavior that will
     /// set the branch to the current one in the repository. If something went
     /// wrong with the current one, it will set the value to master.
     #[structopt(short, long)]
     pub branch: Option<String>,
+
+    /// Set the tag (alias for --branch).
+    ///
+    /// By setting the tag, you can override the default behavior that will set
+    /// the branch to the current one in the repository and will instead take
+    /// the reference tag (or branch) given as parameter.
+    #[structopt(short, long)]
+    pub tag: Option<String>,
 
     /// Set a commit
     ///

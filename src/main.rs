@@ -59,15 +59,19 @@ fn main() {
         }
     };
 
-    // Get the branch to show in the browser. If the option is given, then, the
-    // value will be used, else, the current branch is given, or master if
-    // something went wrong.
-    let branch = match opt.branch {
-        Some(branch) => branch,
-        None => {
-            logger.verbose_print("No branch given, getting current one");
+    // Get the tag to show in the browser. If the option is given, then the value
+    // will be used as it is an alias for branch.
+    let reference = if let Some(tag) = opt.tag { tag } else {
+        // Get the branch to show in the browser. If the option is given, then, the
+        // value will be used, else, the current branch is given, or master if
+        // something went wrong.
+        match opt.branch {
+            Some(branch) => branch,
+            None => {
+                logger.verbose_print("No branch given, getting current one");
 
-            git::get_branch(&repo, &logger)
+                git::get_branch(&repo, &logger)
+            }
         }
     };
 
@@ -105,11 +109,11 @@ fn main() {
         )
     } else {
         format!(
-            "https://{domain}/{repository}/{path}/{branch}",
+            "https://{domain}/{repository}/{path}/{reference}",
             domain = parts.0,
             path = if parts.0 == BITBUCKET_HOSTNAME {"src"} else {"tree"},
             repository = parts.1,
-            branch = branch
+            reference = reference
         )
     };
 

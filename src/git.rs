@@ -3,9 +3,12 @@ use git2::{Error, ErrorCode, Repository};
 
 /// Get the current repository.
 pub fn get_repo() -> Result<Repository, Error> {
-    Repository::discover(".")
+    const CURRENT_WORKING_DIRECTORY: &str = ".";
+
+    Repository::discover(CURRENT_WORKING_DIRECTORY)
 }
 
+// Get the current branch or return master.
 pub fn get_branch(repo: &Repository, logger: &Logger) -> String {
     let head = match repo.head() {
         Ok(head) => Some(head),

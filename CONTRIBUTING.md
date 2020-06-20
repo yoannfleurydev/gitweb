@@ -1,5 +1,9 @@
 # CONTRIBUTING
 
+# Pull Request
+
+Just do the changes, we'll discuss about it on the PR.
+
 ## PUBLISHING
 
 - [ ] Change the code you want to update.
