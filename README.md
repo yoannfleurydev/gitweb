@@ -27,10 +27,10 @@ Download the binary from the [latest release](https://github.com/yoannfleurydev/
 repository.
 
 ```
-gitweb 0.1.11
+gitweb 0.1.13
 
 USAGE:
-    gitweb.exe [FLAGS] [OPTIONS]
+    gitweb [FLAGS] [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
@@ -38,16 +38,18 @@ FLAGS:
     -v, --verbose    Set the verbosity of the command
 
 OPTIONS:
-    -b, --branch <branch>      Set the branch
+    -b, --branch <branch>      Set the branch (alias for --tag)
     -B, --browser <browser>    Set the browser
+    -c, --commit <commit>      Set a commit
     -r, --remote <remote>      Set the remote
+    -t, --tag <tag>            Set the tag (alias for --branch)
 ```
 
-## --branch
+## --branch, --tag
 
-`gitweb` will open the current branch on the remote repository. You can override
-the behavior by giving the `--branch` flag with the custom branch you want to
-open in the browser.
+`gitweb` will open the current branch or tag on the remote repository. You can
+override the behavior by giving either `--branch` or `--tag` flag with the
+custom branch or tag you want to open in the browser.
 
 ## --browser
 
@@ -56,6 +58,10 @@ open in the browser.
 - `--browser` option given in the command line
 - `$BROWSER` on Linux 🐧 or `%BROWSER%` on Windows 🏁 (this is a non standard variable)
 - the default web browser on the system
+
+## --commit
+
+`gitweb` will open the commit given as a parameter on the remote repository.
 
 ## --remote
 
