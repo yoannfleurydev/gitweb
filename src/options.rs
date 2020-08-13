@@ -38,7 +38,7 @@ pub struct Opt {
     /// web browser on the system
     /// If you give an empty string to browser option, the program will only
     /// print the remote URL into the stdout.
-    #[structopt(short = "-B", long)]
+    #[structopt(short = "-B", long, env)]
     pub browser: Option<String>,
 
     /// Set the remote
