@@ -1,17 +1,16 @@
-use crate::ExitCode;
-use git2::{ErrorCode, Repository};
+use crate::Issue;
 use anyhow::Result;
-use std::process::exit;
+use git2::{ErrorCode, Repository};
 
 /// Get the current repository.
 // Will check that the user is in a git repository.
-pub fn get_repo() -> Result<Repository> {
+pub fn get_repo() -> Result<Repository, Issue> {
     const CURRENT_WORKING_DIRECTORY: &str = ".";
 
-    Repository::discover(CURRENT_WORKING_DIRECTORY).map_err(|_| {
-        debug!("Command failed, please run command inside a git directory");
-        exit(ExitCode::NotInAGitRepository as i32);
-    })
+    let repo =
+        Repository::discover(CURRENT_WORKING_DIRECTORY).map_err(|_| Issue::NotInAGitRepository)?;
+
+    Ok(repo)
 }
 
 // Get the current branch or return master.
