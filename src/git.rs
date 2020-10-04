@@ -20,12 +20,15 @@ pub fn get_branch(repo: &Repository) -> String {
         Err(ref e) if e.code() == ErrorCode::UnbornBranch || e.code() == ErrorCode::NotFound => {
             None
         }
-        Err(e) => panic!("failed to get head ref {}", e),
+        Err(e) => {
+            error!("failed to get head ref '{}'", e);
+            None
+        }
     };
 
     let head = head.as_ref().and_then(|h| h.shorthand());
     debug!(
-        "# On branch {}",
+        "On branch '{}'",
         head.unwrap_or("Not currently on any branch")
     );
 

@@ -1,13 +1,10 @@
 use regex::Regex;
-use std::process::{Child, Command};
 use thiserror::Error;
 
 use crate::options::Opt;
 
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate lazy_static;
 
 mod git;
 pub mod options;
@@ -22,7 +19,7 @@ pub enum Issue {
     NoRemoteAvailable,
     #[error("Not able to open system browser")]
     NotAbleToOpenSystemBrowser,
-    #[error("Unable to open browser {0}")]
+    #[error("Unable to open browser '{0}'")]
     BrowserNotAvailable(String),
     #[error("Unable to get remote parts, please open an issue as it might come from the code")]
     UnableToGetRemoteParts,
@@ -76,17 +73,10 @@ pub struct RemoteParts {
 
 const DEFAULT_REMOTE_ORIGIN: &str = "origin";
 
-/// Function to open the browser using the system shell.
-fn open_browser(browser: &str, url: &str) -> std::io::Result<Child> {
-    Command::new(browser).arg(url).spawn()
-}
-
 pub fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"((\w+://)|(git@))(.+@)*(?P<domain>[\w\d.]+)(:[\d]+)?/*(:?)(?P<repository>[^.]*)(\.git)?(/)?$").unwrap();
-    }
+    let re: Regex = Regex::new(r"((\w+://)|(git@))(.+@)*(?P<domain>[\w\d.]+)(:[\d]+)?/*(:?)(?P<repository>[^.]*)(\.git)?(/)?$").unwrap();
 
-    let caps = RE
+    let caps = re
         .captures(url)
         .ok_or_else(|| ())
         .map_err(|_| Issue::UnableToGetRemoteParts)?;
@@ -121,7 +111,9 @@ pub fn run(opt: Opt) -> Result {
         })
     };
 
-    let remote_name = &opt.remote.unwrap_or(String::from(DEFAULT_REMOTE_ORIGIN));
+    let remote_name = &opt
+        .remote
+        .unwrap_or_else(|| String::from(DEFAULT_REMOTE_ORIGIN));
 
     debug!("Getting remote url for '{}' remote name", remote_name);
 
@@ -137,23 +129,21 @@ pub fn run(opt: Opt) -> Result {
     let RemoteParts { domain, repository } = get_remote_parts(remote_url).unwrap();
 
     let (path, tail) = if let Some(commit) = opt.commit {
-        (
-            if domain == GitProvider::Bitbucket.hostname() {
-                "commits"
-            } else {
-                "commmit"
-            },
-            commit,
-        )
+        let path = if domain == GitProvider::Bitbucket.hostname() {
+            "commits"
+        } else {
+            "commit"
+        };
+
+        (path, commit)
     } else {
-        (
-            if domain == GitProvider::Bitbucket.hostname() {
-                "src"
-            } else {
-                "tree"
-            },
-            reference,
-        )
+        let path = if domain == GitProvider::Bitbucket.hostname() {
+            "src"
+        } else {
+            "tree"
+        };
+
+        (path, reference)
     };
 
     let url = format!(
@@ -167,13 +157,13 @@ pub fn run(opt: Opt) -> Result {
     // If the option is available through the command line, open the given one
     match opt.browser {
         Some(option_browser) => {
-            debug!("Browser {} given as option", option_browser);
+            debug!("Browser '{}' given as option", option_browser);
 
             if option_browser == "" {
                 println!("{}", url);
             }
 
-            open_browser(&option_browser, &url)
+            open::with(&url, &option_browser)
                 .map_err(|_| Issue::BrowserNotAvailable(option_browser))?;
 
             Ok(Success)

@@ -128,7 +128,6 @@ dependencies = [
  "anyhow",
  "flexi_logger",
  "git2",
- "lazy_static",
  "log",
  "open",
  "regex",
