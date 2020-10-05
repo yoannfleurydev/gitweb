@@ -1,6 +1,6 @@
 [package]
 name = "gitweb"
-version = "0.1.13"
+version = "0.2.0"
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
 edition = "2018"
 description = "Open the current remote repository in your browser"
@@ -22,3 +22,7 @@ regex = "1"
 structopt = "0.3"
 open = "1.4"
 git2 = "0.13"
+log = "0.4"
+flexi_logger = "0.15"
+anyhow = "1.0"
+thiserror = "1.0"
