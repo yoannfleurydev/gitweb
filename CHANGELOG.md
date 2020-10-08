@@ -5,13 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.1] - 2020-10-07
+## [0.2.1] - 2020-10-12
 
 ### Changed
 
 - bump flexi_logger from 0.15.12 to 0.16.1
 - bump anyhow from 1.0.32 to 1.0.33
 - bump thiserror from 1.0.20 to 1.0.21
+- update other deps
 
 ## [0.2.0] - 2020-10-05
 
