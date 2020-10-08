@@ -1,6 +1,6 @@
 [package]
 name = "gitweb"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
 edition = "2018"
 description = "Open the current remote repository in your browser"
