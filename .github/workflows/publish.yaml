@@ -42,7 +42,7 @@ jobs:
         with:
           gzip: false
           files: >
-            gitweb-${{ github.ref }}-linux:target/release/gitweb
+            gitweb-linux:target/release/gitweb
           token: ${{ secrets.GITHUB_TOKEN }}
 
   release_windows:
@@ -62,7 +62,7 @@ jobs:
         with:
           gzip: false
           files: >
-            gitweb-${{ github.ref }}-windows:target/release/gitweb.exe
+            gitweb-windows:target/release/gitweb.exe
           token: ${{ secrets.GITHUB_TOKEN }}
 
   release_macos:
@@ -82,5 +82,5 @@ jobs:
         with:
           gzip: false
           files: >
-            gitweb-${{ github.ref }}-macos:target/release/gitweb
+            gitweb-macos:target/release/gitweb
           token: ${{ secrets.GITHUB_TOKEN }}
