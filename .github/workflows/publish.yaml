@@ -6,20 +6,11 @@ on:
      - '*'
 
 jobs:
-  release_linux:
-    name: Linux Release
+  publish_on_crates_io:
+    name: Publish on crates.io
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Linux Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
-      - name: Linux Package
-        uses: actions-rs/cargo@v1
-        with:
-          command: package
       - name: Login to crates.io
         uses: actions-rs/cargo@v1
         with:
@@ -33,11 +24,63 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: publish
+
+  release_linux:
+    needs: publish_on_crates_io
+    name: Linux Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Linux Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
       - name: Release Linux binary
-        uses: meeDamian/github-release@1.0
+        uses: meeDamian/github-release@2.0
         if: startsWith(github.ref, 'refs/tags/')
         with:
           gzip: false
           files: >
-            gitweb:target/release/gitweb
+            gitweb-${{ github.ref }}-linux:target/release/gitweb
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  release_windows:
+    needs: publish_on_crates_io
+    name: Windows Release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Windows Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+      - name: Release Windows binary
+        uses: meeDamian/github-release@2.0
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          gzip: false
+          files: >
+            gitweb-${{ github.ref }}-windows:target/release/gitweb.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  release_macos:
+    needs: publish_on_crates_io
+    name: MacOS Release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: MacOS Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+      - name: Release MacOS binary
+        uses: meeDamian/github-release@2.0
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          gzip: false
+          files: >
+            gitweb-${{ github.ref }}-macos:target/release/gitweb
           token: ${{ secrets.GITHUB_TOKEN }}
