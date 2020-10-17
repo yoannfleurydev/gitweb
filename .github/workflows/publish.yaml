@@ -9,6 +9,8 @@ jobs:
   publish_on_crates_io:
     name: Publish on crates.io
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v2
       - name: Login to crates.io
@@ -50,7 +52,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.publish_on_crates_io.outputs.upload_url }}
           asset_path: ./target/release/gitweb
           asset_name: gitweb-linux
           asset_content_type: application/x-sharedlib
@@ -72,7 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.publish_on_crates_io.outputs.upload_url }}
           asset_path: ./target/release/gitweb.exe
           asset_name: gitweb-windows.exe
           asset_content_type: application/x-dosexec
@@ -94,7 +96,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.publish_on_crates_io.outputs.upload_url }}
           asset_path: ./target/release/gitweb
           asset_name: gitweb-macos
           asset_content_type: application/x-mach-binary
