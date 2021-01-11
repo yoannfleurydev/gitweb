@@ -22,6 +22,13 @@ pub struct Opt {
     #[structopt(short, long)]
     pub tag: Option<String>,
 
+    /// Set the merge request flag.
+    ///
+    /// By setting the merge_request flag, you can override the default behavior that will
+    /// open up the merge requests listing page.
+    #[structopt(short = "-M", long = "--merge-request", conflicts_with_all = &["commit", "tag", "branch"])]
+    pub merge_request: bool,
+
     /// Set a commit
     ///
     /// By setting a commit, you can override the default behavior that will
