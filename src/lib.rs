@@ -9,6 +9,11 @@ extern crate log;
 mod git;
 pub mod options;
 
+const BITBUCKET_HOSTNAME: &str = "bitbucket.org";
+const GITHUB_HOSTNAME: &str = "github.com";
+const GITLAB_HOSTNAME: &str = "gitlab.com";
+const GITEA_HOSTNAME: &str = "gitea.io";
+
 #[derive(Debug, Eq, Error, PartialEq, Clone)]
 pub enum Issue {
     #[error("Command failed, please run command inside a git directory")]
@@ -23,6 +28,8 @@ pub enum Issue {
     BrowserNotAvailable(String),
     #[error("Unable to get remote parts, please open an issue as it might come from the code")]
     UnableToGetRemoteParts,
+    #[error("Unknown provider")]
+    UnknownProvider,
 }
 
 pub struct Success;
@@ -37,6 +44,7 @@ impl Issue {
             Self::NotAbleToOpenSystemBrowser => 4,
             Self::BrowserNotAvailable(..) => 5,
             Self::UnableToGetRemoteParts => 6,
+            Self::UnknownProvider => 7,
         }
     }
 }
@@ -57,10 +65,10 @@ impl Default for GitProvider {
 impl GitProvider {
     fn hostname(&self) -> String {
         match self {
-            Self::GitHub => "github.com",
-            Self::GitLab => "gitlab.com",
-            Self::Bitbucket => "bitbucket.org",
-            Self::Gitea => "gitea.io",
+            Self::GitHub => GITHUB_HOSTNAME,
+            Self::GitLab => GITLAB_HOSTNAME,
+            Self::Bitbucket => BITBUCKET_HOSTNAME,
+            Self::Gitea => GITEA_HOSTNAME,
         }
         .to_string()
     }
@@ -71,9 +79,14 @@ pub struct RemoteParts {
     repository: String,
 }
 
+struct MergeRequestParts {
+    path: String,
+    tail: String,
+}
+
 const DEFAULT_REMOTE_ORIGIN: &str = "origin";
 
-pub fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
+fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
     let re: Regex = Regex::new(r"((\w+://)|(git@))(.+@)*(?P<domain>[\w\d.]+)(:[\d]+)?/*(:?)(?P<repository>[^.]*)(\.git)?(/)?$").unwrap();
 
     let caps = re
@@ -89,6 +102,28 @@ pub fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
         .map_or("".to_string(), |m| m.as_str().to_string());
 
     Ok(RemoteParts { domain, repository })
+}
+
+fn get_merge_request_parts(domain: &str) -> anyhow::Result<MergeRequestParts, Issue> {
+    match domain {
+        GITHUB_HOSTNAME => Ok(MergeRequestParts {
+            path: "pulls".to_string(),
+            tail: "".to_string(),
+        }),
+        GITLAB_HOSTNAME => Ok(MergeRequestParts {
+            path: "-/merge_requests".to_string(),
+            tail: "".to_string(),
+        }),
+        BITBUCKET_HOSTNAME => Ok(MergeRequestParts {
+            path: "pull-requests".to_string(),
+            tail: "".to_string(),
+        }),
+        GITEA_HOSTNAME => Ok(MergeRequestParts {
+            path: "pulls".to_string(),
+            tail: "".to_string(),
+        }),
+        _ => Err(Issue::UnknownProvider)
+    }
 }
 
 pub fn run(opt: Opt) -> Result {
@@ -146,20 +181,23 @@ pub fn run(opt: Opt) -> Result {
         (path, reference)
     };
 
-    let url = format!(
-        "https://{domain}/{repository}/{path}/{tail}",
-        domain = domain,
-        path = path,
-        repository = repository,
-        tail = tail
-    );
+    let (path, tail) = if opt.merge_request {
+        debug!("Getting merge request parts for domain '{}'", domain);
+        let MergeRequestParts { path, tail } = get_merge_request_parts(&domain).unwrap();
+        (path.as_str().to_owned(), tail.as_str().to_owned())
+    } else {
+        (path.to_string(), tail.to_string())
+    };
+
+    // Generate the requested url that has to be opened in the browser
+    let url = generate_url(&domain, &repository, &path, &tail);
 
     // If the option is available through the command line, open the given one
     match opt.browser {
         Some(option_browser) => {
             debug!("Browser '{}' given as option", option_browser);
 
-            if option_browser == "" {
+            if option_browser == "".to_string() {
                 println!("{}", url);
             }
 
@@ -172,13 +210,23 @@ pub fn run(opt: Opt) -> Result {
             // Open the default web browser on the current system.
             match open::that(&url) {
                 Ok(_) => {
-                    debug!("Default browser is now open");
+                    debug!("Default browser is now opened");
                     Ok(Success)
                 }
                 Err(_) => Err(Issue::NotAbleToOpenSystemBrowser),
             }
         }
     }
+}
+
+fn generate_url(domain: &str, repository: &String, path: &String, tail: &String) -> String {
+    format!(
+        "https://{domain}/{repository}/{path}/{tail}",
+        domain = domain,
+        path = path,
+        repository = repository,
+        tail = tail
+    )
 }
 
 #[cfg(test)]
@@ -239,5 +287,48 @@ mod tests {
 
         assert_eq!(domain, "host.xz");
         assert_eq!(repository, "path/to/repo");
+    }
+
+    #[test]
+    fn test_get_merge_request_parts_with_github() {
+        let MergeRequestParts { path, tail } =
+            get_merge_request_parts(GITHUB_HOSTNAME).unwrap();
+
+        assert_eq!(path, "pulls");
+        assert_eq!(tail, "");
+    }
+
+    #[test]
+    fn test_get_merge_request_parts_with_gitlab() {
+        let MergeRequestParts { path, tail } =
+            get_merge_request_parts(GITLAB_HOSTNAME).unwrap();
+
+        assert_eq!(path, "-/merge_requests");
+        assert_eq!(tail, "");
+    }
+
+    #[test]
+    fn test_get_merge_request_parts_with_bitbucket() {
+        let MergeRequestParts { path, tail } =
+            get_merge_request_parts(BITBUCKET_HOSTNAME).unwrap();
+
+        assert_eq!(path, "pull-requests");
+        assert_eq!(tail, "");
+    }
+
+    #[test]
+    fn test_get_merge_request_parts_with_gitea() {
+        let MergeRequestParts { path, tail } =
+            get_merge_request_parts(GITEA_HOSTNAME).unwrap();
+
+        assert_eq!(path, "pulls");
+        assert_eq!(tail, "");
+    }
+
+    #[test]
+    fn test_get_merge_request_parts_with_unknown_provider() {
+        let result = get_merge_request_parts("host.xz");
+
+        assert_eq!(result.err(), Some(Issue::UnknownProvider));
     }
 }
