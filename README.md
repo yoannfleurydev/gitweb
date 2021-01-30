@@ -27,19 +27,20 @@ Download the binary from the [latest release](https://github.com/yoannfleurydev/
 repository.
 
 ```
-gitweb 0.1.13
+gitweb 0.3.0
 
 USAGE:
     gitweb [FLAGS] [OPTIONS]
 
 FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-    -v, --verbose    Set the verbosity of the command
+    -h, --help             Prints help information
+    -M, --merge-request    Set the merge request flag
+    -V, --version          Prints version information
+    -v, --verbose          Set the verbosity of the command
 
 OPTIONS:
     -b, --branch <branch>      Set the branch (alias for --tag)
-    -B, --browser <browser>    Set the browser
+    -B, --browser <browser>    Set the browser [env: BROWSER=]
     -c, --commit <commit>      Set a commit
     -r, --remote <remote>      Set the remote
     -t, --tag <tag>            Set the tag (alias for --branch)
