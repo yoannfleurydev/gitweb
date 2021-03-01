@@ -20,7 +20,7 @@ exclude = [
 [dependencies]
 regex = "1"
 structopt = "0.3"
-open = "1.4"
+open = "1.5"
 git2 = "0.13"
 log = "0.4"
 flexi_logger = "0.17"
