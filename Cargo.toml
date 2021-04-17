@@ -1,28 +1,29 @@
 [package]
-name = "gitweb"
-version = "0.3.0"
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
-edition = "2018"
-description = "Open the current remote repository in your browser"
-repository = "https://github.com/yoannfleurydev/gitweb"
-homepage = "https://github.com/yoannfleurydev/gitweb"
-readme = "README.md"
-keywords = ["git", "browser"]
 categories = ["command-line-utilities"]
-license = "Apache-2.0"
+description = "Open the current remote repository in your browser"
+edition = "2018"
 exclude = [
-    "docs/",
-    ".editorconfig",
-    ".github/",
-    "*.md"
+  "docs/",
+  ".editorconfig",
+  ".github/",
+  "*.md",
 ]
+homepage = "https://github.com/yoannfleurydev/gitweb"
+keywords = ["git", "browser"]
+license = "Apache-2.0"
+name = "gitweb"
+readme = "README.md"
+repository = "https://github.com/yoannfleurydev/gitweb"
+version = "0.3.1"
 
 [dependencies]
-regex = "1"
-structopt = "0.3"
-open = "1.6"
+anyhow = "1.0"
+flexi_logger = "0.17"
+git-url-parse = "0.3"
 git2 = "0.13"
 log = "0.4"
-flexi_logger = "0.17"
-anyhow = "1.0"
+open = "1.6"
+regex = "1"
+structopt = "0.3"
 thiserror = "1.0"

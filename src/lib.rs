@@ -1,4 +1,4 @@
-use regex::Regex;
+use git_url_parse::GitUrl;
 use thiserror::Error;
 
 use crate::options::Opt;
@@ -87,19 +87,19 @@ struct MergeRequestParts {
 const DEFAULT_REMOTE_ORIGIN: &str = "origin";
 
 fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
-    let re: Regex = Regex::new(r"((\w+://)|(git@))(.+@)*(?P<domain>[\w\d.]+)(:[\d]+)?/*(:?)(?P<repository>[^.]*)(\.git)?(/)?$").unwrap();
+    let giturl = GitUrl::parse(url).map_err(|_| Issue::UnableToGetRemoteParts)?;
 
-    let caps = re
-        .captures(url)
-        .ok_or_else(|| ())
-        .map_err(|_| Issue::UnableToGetRemoteParts)?;
-
-    let domain = caps
-        .name("domain")
+    let domain = giturl
+        .host
         .map_or(GitProvider::GitHub.hostname(), |m| m.as_str().to_string());
-    let repository = caps
-        .name("repository")
-        .map_or("".to_string(), |m| m.as_str().to_string());
+
+    let repository = giturl
+        .path
+        .replace(".git", "") // don't want the .git part
+        .split("/")
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<&str>>()
+        .join("/");
 
     Ok(RemoteParts { domain, repository })
 }
@@ -122,7 +122,7 @@ fn get_merge_request_parts(domain: &str) -> anyhow::Result<MergeRequestParts, Is
             path: "pulls".to_string(),
             tail: "".to_string(),
         }),
-        _ => Err(Issue::UnknownProvider)
+        _ => Err(Issue::UnknownProvider),
     }
 }
 
@@ -281,6 +281,15 @@ mod tests {
     }
 
     #[test]
+    fn test_with_http_dash_and_port_git_url_parts() {
+        let RemoteParts { domain, repository } =
+            get_remote_parts("http://host-dash.xz:80/path/to/repo.git/").unwrap();
+
+        assert_eq!(domain, "host-dash.xz");
+        assert_eq!(repository, "path/to/repo");
+    }
+
+    #[test]
     fn test_with_http_git_url_parts() {
         let RemoteParts { domain, repository } =
             get_remote_parts("https://host.xz/path/to/repo.git/").unwrap();
@@ -291,8 +300,7 @@ mod tests {
 
     #[test]
     fn test_get_merge_request_parts_with_github() {
-        let MergeRequestParts { path, tail } =
-            get_merge_request_parts(GITHUB_HOSTNAME).unwrap();
+        let MergeRequestParts { path, tail } = get_merge_request_parts(GITHUB_HOSTNAME).unwrap();
 
         assert_eq!(path, "pulls");
         assert_eq!(tail, "");
@@ -300,8 +308,7 @@ mod tests {
 
     #[test]
     fn test_get_merge_request_parts_with_gitlab() {
-        let MergeRequestParts { path, tail } =
-            get_merge_request_parts(GITLAB_HOSTNAME).unwrap();
+        let MergeRequestParts { path, tail } = get_merge_request_parts(GITLAB_HOSTNAME).unwrap();
 
         assert_eq!(path, "-/merge_requests");
         assert_eq!(tail, "");
@@ -309,8 +316,7 @@ mod tests {
 
     #[test]
     fn test_get_merge_request_parts_with_bitbucket() {
-        let MergeRequestParts { path, tail } =
-            get_merge_request_parts(BITBUCKET_HOSTNAME).unwrap();
+        let MergeRequestParts { path, tail } = get_merge_request_parts(BITBUCKET_HOSTNAME).unwrap();
 
         assert_eq!(path, "pull-requests");
         assert_eq!(tail, "");
@@ -318,8 +324,7 @@ mod tests {
 
     #[test]
     fn test_get_merge_request_parts_with_gitea() {
-        let MergeRequestParts { path, tail } =
-            get_merge_request_parts(GITEA_HOSTNAME).unwrap();
+        let MergeRequestParts { path, tail } = get_merge_request_parts(GITEA_HOSTNAME).unwrap();
 
         assert_eq!(path, "pulls");
         assert_eq!(tail, "");
