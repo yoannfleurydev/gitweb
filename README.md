@@ -7,7 +7,7 @@
 
 `gitweb` is a command line interface I created mainly to learn Rust.
 
-![preview](./docs/preview.gif)
+![preview](./docs/gitweb.mp4)
 
 ## Intallation
 
