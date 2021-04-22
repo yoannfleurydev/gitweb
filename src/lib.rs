@@ -96,7 +96,7 @@ fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
     let repository = giturl
         .path
         .replace(".git", "") // don't want the .git part
-        .split("/")
+        .split('/')
         .filter(|s| !s.is_empty())
         .collect::<Vec<&str>>()
         .join("/");
@@ -158,7 +158,7 @@ pub fn run(opt: Opt) -> Result {
 
     let remote_url = optional_remote
         .url()
-        .ok_or_else(|| ())
+        .ok_or(())
         .map_err(|_| Issue::NoRemoteAvailable)?;
 
     let RemoteParts { domain, repository } = get_remote_parts(remote_url).unwrap();
@@ -184,9 +184,9 @@ pub fn run(opt: Opt) -> Result {
     let (path, tail) = if opt.merge_request {
         debug!("Getting merge request parts for domain '{}'", domain);
         let MergeRequestParts { path, tail } = get_merge_request_parts(&domain).unwrap();
-        (path.as_str().to_owned(), tail.as_str().to_owned())
+        (path, tail)
     } else {
-        (path.to_string(), tail.to_string())
+        (path.to_owned(), tail)
     };
 
     // Generate the requested url that has to be opened in the browser
@@ -197,7 +197,7 @@ pub fn run(opt: Opt) -> Result {
         Some(option_browser) => {
             debug!("Browser '{}' given as option", option_browser);
 
-            if option_browser == "".to_string() {
+            if option_browser == *"" {
                 println!("{}", url);
             }
 
@@ -219,7 +219,7 @@ pub fn run(opt: Opt) -> Result {
     }
 }
 
-fn generate_url(domain: &str, repository: &String, path: &String, tail: &String) -> String {
+fn generate_url(domain: &str, repository: &str, path: &str, tail: &str) -> String {
     format!(
         "https://{domain}/{repository}/{path}/{tail}",
         domain = domain,
