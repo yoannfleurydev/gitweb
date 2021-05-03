@@ -155,7 +155,6 @@ dependencies = [
  "git2",
  "log",
  "open",
- "regex",
  "structopt",
  "thiserror",
 ]
