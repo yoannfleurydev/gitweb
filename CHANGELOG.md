@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - YYYY-MM-DD
+
+### Changed
+
+- update README to add the homebrew installation instructions
+- upgrade dependencies
+
 ## [0.3.1] - 2021-04-17
 
 ### Changed

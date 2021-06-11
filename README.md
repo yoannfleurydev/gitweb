@@ -11,13 +11,22 @@
 
 ## Intallation
 
-### The Cargo way
+### 🍺 The homebrew way
 
+```sh
+brew install yoannfleurydev/gitweb/gitweb
+# or
+brew tap yoannfleurydev/gitweb
+brew install gitweb
 ```
+
+### 📦 The Cargo way
+
+```sh
 cargo install gitweb
 ```
 
-### The binary way
+### ⚙️ The binary way
 
 Download the binary from the [latest release](https://github.com/yoannfleurydev/gitweb/releases/latest) and put it in your PATH.
 
@@ -27,7 +36,7 @@ Download the binary from the [latest release](https://github.com/yoannfleurydev/
 repository.
 
 ```
-gitweb 0.3.0
+gitweb 0.3.1
 
 USAGE:
     gitweb [FLAGS] [OPTIONS]
