@@ -19,7 +19,7 @@ version = "0.3.1"
 
 [dependencies]
 anyhow = "1.0"
-flexi_logger = "0.17"
+flexi_logger = "0.18"
 git-url-parse = "0.3"
 git2 = "0.13"
 log = "0.4"
