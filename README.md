@@ -30,6 +30,13 @@ cargo install gitweb
 
 Download the binary from the [latest release](https://github.com/yoannfleurydev/gitweb/releases/latest) and put it in your PATH.
 
+### 🖥 The MacPorts way
+
+```
+sudo port selfupdate
+sudo port install gitweb
+```
+
 ## Usage
 
 `gitweb` will by default open the remote in the browser of the current
