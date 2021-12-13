@@ -19,7 +19,7 @@ version = "0.3.3"
 
 [dependencies]
 anyhow = "1.0"
-flexi_logger = {version = "0.20", features = ["use_chrono_for_offset"]}
+flexi_logger = {version = "0.21", features = ["use_chrono_for_offset"]}
 git-url-parse = "0.4"
 git2 = "0.13"
 log = "0.4"
