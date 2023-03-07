@@ -23,6 +23,6 @@ flexi_logger = {version = "0.22", features = ["use_chrono_for_offset"]}
 git-url-parse = "0.4"
 git2 = "0.14"
 log = "0.4"
-open = "2.1"
+open = "3.4"
 structopt = "0.3"
 thiserror = "1.0"
