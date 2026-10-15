@@ -49,17 +49,13 @@ impl Issue {
     }
 }
 
+#[derive(Default)]
 enum GitProvider {
+    #[default]
     GitHub,
     GitLab,
     Bitbucket,
     Gitea,
-}
-
-impl Default for GitProvider {
-    fn default() -> Self {
-        Self::GitHub
-    }
 }
 
 impl GitProvider {
@@ -90,11 +86,11 @@ fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
     let giturl = GitUrl::parse(url).map_err(|_| Issue::UnableToGetRemoteParts)?;
 
     let domain = giturl
-        .host
-        .map_or(GitProvider::GitHub.hostname(), |m| m.as_str().to_string());
+        .host()
+        .map_or(GitProvider::GitHub.hostname(), |m| m.to_string());
 
     let repository = giturl
-        .path
+        .path()
         .replace(".git", "") // don't want the .git part
         .split('/')
         .filter(|s| !s.is_empty())
@@ -158,7 +154,6 @@ pub fn run(opt: Opt) -> Result {
 
     let remote_url = optional_remote
         .url()
-        .ok_or(())
         .map_err(|_| Issue::NoRemoteAvailable)?;
 
     let RemoteParts { domain, repository } = get_remote_parts(remote_url).unwrap();

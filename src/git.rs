@@ -26,7 +26,7 @@ pub fn get_branch(repo: &Repository) -> String {
         }
     };
 
-    let head = head.as_ref().and_then(|h| h.shorthand());
+    let head = head.as_ref().and_then(|h| h.shorthand().ok());
     debug!(
         "On branch '{}'",
         head.unwrap_or("Not currently on any branch")
