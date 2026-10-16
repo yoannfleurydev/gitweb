@@ -5,98 +5,77 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+
 jobs:
   publish_on_crates_io:
     name: Publish on crates.io
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v2
-      - name: Login to crates.io
-        uses: actions-rs/cargo@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          command: login
-          args: ${{ secrets.CRATES_IO_TOKEN_GITWEB }}
-      - name: Package the crate
-        uses: actions-rs/cargo@v1
-        with:
-          command: package
+          persist-credentials: false
+      - name: Set up Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
       - name: Publish the crate
-        uses: actions-rs/cargo@v1
-        with:
-          command: publish
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN_GITWEB }}
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+        run: gh release create "$TAG" --title "Release $TAG" --verify-tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
 
-  release_linux:
+  release:
     needs: publish_on_crates_io
-    name: Linux Release
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }} Release
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-latest
+            binary: gitweb
+            asset_name: gitweb-linux
+          - name: Windows
+            os: windows-latest
+            binary: gitweb.exe
+            asset_name: gitweb-windows.exe
+          - name: MacOS
+            os: macos-latest
+            binary: gitweb
+            asset_name: gitweb-macos
     steps:
-      - uses: actions/checkout@v2
-      - name: Linux Build
-        uses: actions-rs/cargo@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          command: build
-          args: --release
-      - name: Upload Release Asset Linux
-        id: upload-release-asset-linux
-        uses: actions/upload-release-asset@v1
+          persist-credentials: false
+      - name: Set up Rust toolchain
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - name: Build
+        run: cargo build --release
+      - name: Upload Release Asset
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/release/$BINARY" "dist/$ASSET_NAME"
+          gh release upload "$TAG" "dist/$ASSET_NAME"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.publish_on_crates_io.outputs.upload_url }}
-          asset_path: ./target/release/gitweb
-          asset_name: gitweb-linux
-          asset_content_type: application/x-sharedlib
-
-  release_windows:
-    needs: publish_on_crates_io
-    name: Windows Release
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Windows Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
-      - name: Upload Release Asset Windows
-        id: upload-release-asset-windows
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.publish_on_crates_io.outputs.upload_url }}
-          asset_path: ./target/release/gitweb.exe
-          asset_name: gitweb-windows.exe
-          asset_content_type: application/x-dosexec
-
-  release_macos:
-    needs: publish_on_crates_io
-    name: MacOS Release
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: MacOS Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
-      - name: Upload Release Asset MacOS
-        id: upload-release-asset-macos
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.publish_on_crates_io.outputs.upload_url }}
-          asset_path: ./target/release/gitweb
-          asset_name: gitweb-macos
-          asset_content_type: application/x-mach-binary
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          BINARY: ${{ matrix.binary }}
+          ASSET_NAME: ${{ matrix.asset_name }}
