@@ -2,27 +2,22 @@
 authors = ["Yoann Fleury <yoann.fleury@yahoo.com>"]
 categories = ["command-line-utilities"]
 description = "Open the current remote repository in your browser"
-edition = "2018"
-exclude = [
-  "docs/",
-  ".editorconfig",
-  ".github/",
-  "*.md",
-]
+edition = "2021"
+exclude = ["docs/", ".editorconfig", ".github/", "*.md"]
 homepage = "https://github.com/yoannfleurydev/gitweb"
 keywords = ["git", "browser"]
 license = "Apache-2.0"
 name = "gitweb"
 readme = "README.md"
 repository = "https://github.com/yoannfleurydev/gitweb"
-version = "0.3.5"
+version = "0.4.0"
 
 [dependencies]
 anyhow = "1.0"
-flexi_logger = {version = "0.22", features = ["use_chrono_for_offset"]}
-git-url-parse = "0.4"
-git2 = "0.14"
+clap = { version = "4.5", features = ["derive", "env"] }
+flexi_logger = "0.31"
+git-url-parse = "0.6"
+git2 = { version = "0.21", features = ["vendored-openssl"] }
 log = "0.4"
-open = "2.1"
-structopt = "0.3"
-thiserror = "1.0"
+open = "5.4"
+thiserror = "2.0"

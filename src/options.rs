@@ -1,17 +1,16 @@
-extern crate structopt;
+use clap::Parser;
 
-use structopt::StructOpt;
-
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
+#[command(version, about)]
 // Rename all will use the name of the field
-#[structopt(rename_all = "kebab-case")]
+#[command(rename_all = "kebab-case")]
 pub struct Opt {
     /// Set the branch (alias for --tag)
     ///
     /// By setting the branch, you can override the default behavior that will
     /// set the branch to the current one in the repository. If something went
     /// wrong with the current one, it will set the value to master.
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub branch: Option<String>,
 
     /// Set the tag (alias for --branch).
@@ -19,21 +18,21 @@ pub struct Opt {
     /// By setting the tag, you can override the default behavior that will set
     /// the branch to the current one in the repository and will instead take
     /// the reference tag (or branch) given as parameter.
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub tag: Option<String>,
 
     /// Set the merge request flag.
     ///
     /// By setting the merge_request flag, you can override the default behavior that will
     /// open up the merge requests listing page.
-    #[structopt(short = "-M", long = "--merge-request", conflicts_with_all = &["commit", "tag", "branch"])]
+    #[arg(short = 'M', long = "merge-request", conflicts_with_all = ["commit", "tag", "branch"])]
     pub merge_request: bool,
 
     /// Set a commit
     ///
     /// By setting a commit, you can override the default behavior that will
     /// set the branch to the current one in the repository.
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub commit: Option<String>,
 
     /// Set the browser
@@ -45,19 +44,19 @@ pub struct Opt {
     /// web browser on the system
     /// If you give an empty string to browser option, the program will only
     /// print the remote URL into the stdout.
-    #[structopt(short = "-B", long, env)]
+    #[arg(short = 'B', long, env = "BROWSER")]
     pub browser: Option<String>,
 
     /// Set the remote
     ///
     /// By default, the selected remote will be origin by convention. You can
     /// override this setting by  using this option.
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub remote: Option<String>,
 
     /// Set the verbosity of the command
     ///
     /// By settings this option, you will have more feedback on the output.
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub verbose: bool,
 }
