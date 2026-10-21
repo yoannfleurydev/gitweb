@@ -1,4 +1,8 @@
 use clap::Parser;
+use clap_complete::{ArgValueCandidates, CompletionCandidate};
+use git2::Repository;
+
+use crate::git;
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
@@ -10,7 +14,7 @@ pub struct Opt {
     /// By setting the branch, you can override the default behavior that will
     /// set the branch to the current one in the repository. If something went
     /// wrong with the current one, it will set the value to master.
-    #[arg(short, long)]
+    #[arg(short, long, add = ArgValueCandidates::new(complete_branches))]
     pub branch: Option<String>,
 
     /// Set the tag (alias for --branch).
@@ -18,7 +22,7 @@ pub struct Opt {
     /// By setting the tag, you can override the default behavior that will set
     /// the branch to the current one in the repository and will instead take
     /// the reference tag (or branch) given as parameter.
-    #[arg(short, long)]
+    #[arg(short, long, add = ArgValueCandidates::new(complete_tags))]
     pub tag: Option<String>,
 
     /// Set the merge request flag.
@@ -51,7 +55,7 @@ pub struct Opt {
     ///
     /// By default, the selected remote will be origin by convention. You can
     /// override this setting by  using this option.
-    #[arg(short, long)]
+    #[arg(short, long, add = ArgValueCandidates::new(complete_remotes))]
     pub remote: Option<String>,
 
     /// Set the verbosity of the command
@@ -59,4 +63,40 @@ pub struct Opt {
     /// By settings this option, you will have more feedback on the output.
     #[arg(short, long)]
     pub verbose: bool,
+}
+
+fn complete_branches() -> Vec<CompletionCandidate> {
+    complete_with(git::get_branches)
+}
+
+fn complete_tags() -> Vec<CompletionCandidate> {
+    complete_with(git::get_tags)
+}
+
+fn complete_remotes() -> Vec<CompletionCandidate> {
+    complete_with(git::get_remotes)
+}
+
+// Complete with the values from the current repository. Nothing is suggested
+// outside of a repository, as anything printed would end up in the shell.
+fn complete_with(get_values: fn(&Repository) -> Vec<String>) -> Vec<CompletionCandidate> {
+    git::get_repo()
+        .map(|repo| {
+            get_values(&repo)
+                .into_iter()
+                .map(CompletionCandidate::new)
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::CommandFactory;
+
+    #[test]
+    fn test_options_are_valid() {
+        Opt::command().debug_assert();
+    }
 }

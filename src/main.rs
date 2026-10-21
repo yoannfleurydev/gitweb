@@ -1,4 +1,5 @@
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::CompleteEnv;
 use flexi_logger::Logger;
 use gitweb::options::Opt;
 use gitweb::run;
@@ -8,6 +9,10 @@ use std::process::exit;
 extern crate log;
 
 fn main() {
+    // Answer the shell completion requests (COMPLETE=<shell>) before anything
+    // else, as nothing must be written to the output before.
+    CompleteEnv::with_factory(Opt::command).complete();
+
     // Get the command line options.
     let opt = Opt::parse();
 
