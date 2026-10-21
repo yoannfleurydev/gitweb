@@ -37,6 +37,32 @@ sudo port selfupdate
 sudo port install gitweb
 ```
 
+## Shell completion
+
+`gitweb` completes its options on <kbd>TAB</kbd>, as well as the branches, tags
+and remotes of the current repository (`gitweb --branch <TAB>`). Add the line
+for your shell to its configuration. The completion is generated at startup, so
+it stays in sync when you upgrade `gitweb`.
+
+```sh
+# Bash
+echo 'source <(COMPLETE=bash gitweb)' >> ~/.bashrc
+
+# Zsh
+echo 'source <(COMPLETE=zsh gitweb)' >> ~/.zshrc
+
+# Fish
+echo 'COMPLETE=fish gitweb | source' >> ~/.config/fish/completions/gitweb.fish
+
+# Elvish
+echo 'eval (E:COMPLETE=elvish gitweb | slurp)' >> ~/.elvish/rc.elv
+```
+
+```powershell
+# PowerShell
+echo '$env:COMPLETE = "powershell"; gitweb | Out-String | Invoke-Expression; Remove-Item Env:\COMPLETE' >> $PROFILE
+```
+
 ## Usage
 
 `gitweb` will by default open the remote in the browser of the current
