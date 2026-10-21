@@ -68,24 +68,21 @@ echo '$env:COMPLETE = "powershell"; gitweb | Out-String | Invoke-Expression; Rem
 `gitweb` will by default open the remote in the browser of the current
 repository.
 
-```
-gitweb 0.3.1
+```plain
+Open the current remote repository in your browser
 
-USAGE:
-    gitweb [FLAGS] [OPTIONS]
+Usage: gitweb [OPTIONS]
 
-FLAGS:
-    -h, --help             Prints help information
-    -M, --merge-request    Set the merge request flag
-    -V, --version          Prints version information
-    -v, --verbose          Set the verbosity of the command
-
-OPTIONS:
-    -b, --branch <branch>      Set the branch (alias for --tag)
-    -B, --browser <browser>    Set the browser [env: BROWSER=]
-    -c, --commit <commit>      Set a commit
-    -r, --remote <remote>      Set the remote
-    -t, --tag <tag>            Set the tag (alias for --branch)
+Options:
+  -b, --branch <BRANCH>    Set the branch (alias for --tag)
+  -t, --tag <TAG>          Set the tag (alias for --branch)
+  -M, --merge-request      Set the merge request flag
+  -c, --commit <COMMIT>    Set a commit
+  -B, --browser <BROWSER>  Set the browser [env: BROWSER=]
+  -r, --remote <REMOTE>    Set the remote
+  -v, --verbose            Set the verbosity of the command
+  -h, --help               Print help (see more with '--help')
+  -V, --version            Print version
 ```
 
 ## --branch, --tag
