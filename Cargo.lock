@@ -325,6 +325,7 @@ dependencies = [
  "git2",
  "log",
  "open",
+ "percent-encoding",
  "tempfile",
  "thiserror",
 ]

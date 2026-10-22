@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- URL templates in the git config (`gitweb.<host>.branch-template`,
+  `tag-template`, `commit-template` and `merge-request-template`) to open the
+  repositories of self-hosted forges like Bitbucket Server (#55)
+
+### Fixed
+
+- a repository with `.git` in its name, like `user.github.io`, is no longer
+  opened as `userhub.io`
+- `--merge-request` on an unknown host exits with the code 7 instead of
+  panicking
+
 ## 0.5.0 - 2026-10-21
 
 ### Added
