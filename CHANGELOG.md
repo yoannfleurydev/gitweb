@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - URL templates in the git config (`gitweb.<host>.branch-template`,
   `tag-template`, `commit-template` and `merge-request-template`) to open the
   repositories of self-hosted forges like Bitbucket Server (#55)
+- codeberg.org as a known host, with the URLs of Gitea
+
+### Changed
+
+- gitlab.com opens its own URLs (`/-/tree/`, `/-/commit/`) and gitea.com its
+  own (`/src/branch/`, `/src/tag/`) instead of the GitHub ones
+- gitea.com is the known host of Gitea instead of gitea.io, which only
+  redirects to gitea.com
+- the merge requests URLs no longer end with a slash, but on bitbucket.org
+  where it is the canonical URL
 
 ### Fixed
 

@@ -14,7 +14,8 @@ mod template;
 const BITBUCKET_HOSTNAME: &str = "bitbucket.org";
 const GITHUB_HOSTNAME: &str = "github.com";
 const GITLAB_HOSTNAME: &str = "gitlab.com";
-const GITEA_HOSTNAME: &str = "gitea.io";
+const GITEA_HOSTNAME: &str = "gitea.com";
+const CODEBERG_HOSTNAME: &str = "codeberg.org";
 
 #[derive(Debug, Eq, Error, PartialEq, Clone)]
 pub enum Issue {
@@ -60,9 +61,7 @@ impl Issue {
     }
 }
 
-#[derive(Default)]
 enum GitProvider {
-    #[default]
     GitHub,
     GitLab,
     Bitbucket,
@@ -70,14 +69,42 @@ enum GitProvider {
 }
 
 impl GitProvider {
-    fn hostname(&self) -> String {
-        match self {
-            Self::GitHub => GITHUB_HOSTNAME,
-            Self::GitLab => GITLAB_HOSTNAME,
-            Self::Bitbucket => BITBUCKET_HOSTNAME,
-            Self::Gitea => GITEA_HOSTNAME,
+    // Get the provider of the host, if it is one of the built-in ones.
+    fn from_host(host: &str) -> Option<Self> {
+        match host.to_ascii_lowercase().as_str() {
+            GITHUB_HOSTNAME => Some(Self::GitHub),
+            GITLAB_HOSTNAME => Some(Self::GitLab),
+            BITBUCKET_HOSTNAME => Some(Self::Bitbucket),
+            GITEA_HOSTNAME | CODEBERG_HOSTNAME => Some(Self::Gitea),
+            _ => None,
         }
-        .to_string()
+    }
+
+    // The built-in template of the target, in the same format as the
+    // templates of the git config.
+    fn template(&self, target: &Target) -> &'static str {
+        match (self, target) {
+            (Self::GitHub, Target::Branch(..)) => "https://{host}/{repository}/tree/{branch}",
+            (Self::GitHub, Target::Tag(..)) => "https://{host}/{repository}/tree/{tag}",
+            (Self::GitHub, Target::Commit(..)) => "https://{host}/{repository}/commit/{commit}",
+            (Self::GitHub, Target::MergeRequest) => "https://{host}/{repository}/pulls",
+
+            (Self::GitLab, Target::Branch(..)) => "https://{host}/{repository}/-/tree/{branch}",
+            (Self::GitLab, Target::Tag(..)) => "https://{host}/{repository}/-/tree/{tag}",
+            (Self::GitLab, Target::Commit(..)) => "https://{host}/{repository}/-/commit/{commit}",
+            (Self::GitLab, Target::MergeRequest) => "https://{host}/{repository}/-/merge_requests",
+
+            (Self::Bitbucket, Target::Branch(..)) => "https://{host}/{repository}/src/{branch}",
+            (Self::Bitbucket, Target::Tag(..)) => "https://{host}/{repository}/src/{tag}",
+            (Self::Bitbucket, Target::Commit(..)) => "https://{host}/{repository}/commits/{commit}",
+            // The trailing slash is the url of Bitbucket, without it is a redirection
+            (Self::Bitbucket, Target::MergeRequest) => "https://{host}/{repository}/pull-requests/",
+
+            (Self::Gitea, Target::Branch(..)) => "https://{host}/{repository}/src/branch/{branch}",
+            (Self::Gitea, Target::Tag(..)) => "https://{host}/{repository}/src/tag/{tag}",
+            (Self::Gitea, Target::Commit(..)) => "https://{host}/{repository}/commit/{commit}",
+            (Self::Gitea, Target::MergeRequest) => "https://{host}/{repository}/pulls",
+        }
     }
 }
 
@@ -98,11 +125,6 @@ impl RemoteParts {
     }
 }
 
-struct MergeRequestParts {
-    path: String,
-    tail: String,
-}
-
 const DEFAULT_REMOTE_ORIGIN: &str = "origin";
 
 fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
@@ -110,7 +132,7 @@ fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
 
     let domain = giturl
         .host()
-        .map_or(GitProvider::GitHub.hostname(), |m| m.to_string());
+        .map_or(GITHUB_HOSTNAME.to_string(), |m| m.to_string());
 
     let path = giturl
         .path()
@@ -123,28 +145,6 @@ fn get_remote_parts(url: &str) -> anyhow::Result<RemoteParts> {
     let repository = path.strip_suffix(".git").unwrap_or(&path).to_string();
 
     Ok(RemoteParts { domain, repository })
-}
-
-fn get_merge_request_parts(domain: &str) -> anyhow::Result<MergeRequestParts, Issue> {
-    match domain {
-        GITHUB_HOSTNAME => Ok(MergeRequestParts {
-            path: "pulls".to_string(),
-            tail: "".to_string(),
-        }),
-        GITLAB_HOSTNAME => Ok(MergeRequestParts {
-            path: "-/merge_requests".to_string(),
-            tail: "".to_string(),
-        }),
-        BITBUCKET_HOSTNAME => Ok(MergeRequestParts {
-            path: "pull-requests".to_string(),
-            tail: "".to_string(),
-        }),
-        GITEA_HOSTNAME => Ok(MergeRequestParts {
-            path: "pulls".to_string(),
-            tail: "".to_string(),
-        }),
-        _ => Err(Issue::UnknownProvider),
-    }
 }
 
 pub fn run(opt: Opt) -> Result {
@@ -275,72 +275,45 @@ fn build_url(
 
     let key = format!("gitweb.{}.{}", parts.domain, target.template_key());
 
-    if let Some(template) = template::find(config, &parts.domain, target.template_key()) {
-        debug!("Using the '{}' template from {}", template, key);
-
-        let mut placeholders = vec![
-            ("host", parts.domain.clone()),
-            ("repository", parts.repository.clone()),
-        ];
-        // A repository without owner leaves the {owner} placeholder unavailable
-        placeholders.extend(parts.owner().map(|owner| ("owner", owner.to_string())));
-        placeholders.push(("repo", parts.repo().to_string()));
-        placeholders.extend(target.placeholders());
-
-        return template::render(&template, &placeholders).map_err(|placeholder| {
-            Issue::InvalidTemplate {
-                key,
-                placeholder,
-                available: placeholders
-                    .iter()
-                    .map(|(name, _)| format!("{{{name}}}"))
-                    .collect::<Vec<String>>()
-                    .join(", "),
-            }
-        });
-    }
-
-    debug!("No {} configured, using the built-in url", key);
-
-    let RemoteParts { domain, repository } = parts;
-
-    let (path, tail) = match target {
-        Target::Branch(reference) | Target::Tag(reference) => {
-            let path = if domain == GitProvider::Bitbucket.hostname() {
-                "src"
-            } else {
-                "tree"
-            };
-
-            (path.to_string(), reference.clone())
+    let template = match template::find(config, &parts.domain, target.template_key()) {
+        Some(template) => {
+            debug!("Using the '{}' template from {}", template, key);
+            template
         }
-        Target::Commit(commit) => {
-            let path = if domain == GitProvider::Bitbucket.hostname() {
-                "commits"
-            } else {
-                "commit"
-            };
-
-            (path.to_string(), commit.clone())
-        }
-        Target::MergeRequest => {
-            debug!("Getting merge request parts for domain '{}'", domain);
-            let MergeRequestParts { path, tail } = get_merge_request_parts(&domain)?;
-            (path, tail)
+        None => {
+            debug!("No {} configured, using the built-in url", key);
+            builtin_template(&parts.domain, target)?.to_string()
         }
     };
 
-    Ok(generate_url(&domain, &repository, &path, &tail))
+    let mut placeholders = vec![
+        ("host", parts.domain.clone()),
+        ("repository", parts.repository.clone()),
+    ];
+    // A repository without owner leaves the {owner} placeholder unavailable
+    placeholders.extend(parts.owner().map(|owner| ("owner", owner.to_string())));
+    placeholders.push(("repo", parts.repo().to_string()));
+    placeholders.extend(target.placeholders());
+
+    template::render(&template, &placeholders).map_err(|placeholder| Issue::InvalidTemplate {
+        key,
+        placeholder,
+        available: placeholders
+            .iter()
+            .map(|(name, _)| format!("{{{name}}}"))
+            .collect::<Vec<String>>()
+            .join(", "),
+    })
 }
 
-fn generate_url(domain: &str, repository: &str, path: &str, tail: &str) -> String {
-    format!(
-        "https://{domain}/{repository}/{path}/{tail}",
-        domain = domain,
-        path = path,
-        repository = repository,
-        tail = tail
-    )
+// Get the built-in template of the target for the host. Every unknown host is
+// expected to look like GitHub, but for its merge requests.
+fn builtin_template(host: &str, target: &Target) -> core::result::Result<&'static str, Issue> {
+    match GitProvider::from_host(host) {
+        Some(provider) => Ok(provider.template(target)),
+        None if matches!(target, Target::MergeRequest) => Err(Issue::UnknownProvider),
+        None => Ok(GitProvider::GitHub.template(target)),
+    }
 }
 
 #[cfg(test)]
@@ -412,6 +385,55 @@ mod tests {
     }
 
     #[test]
+    fn test_build_url_with_gitlab() {
+        let remote_url = "git@gitlab.com:group/subgroup/repo.git";
+        let cases = [
+            (
+                branch("main"),
+                "https://gitlab.com/group/subgroup/repo/-/tree/main",
+            ),
+            (
+                tag("v1.0"),
+                "https://gitlab.com/group/subgroup/repo/-/tree/v1.0",
+            ),
+            (
+                commit("abc123"),
+                "https://gitlab.com/group/subgroup/repo/-/commit/abc123",
+            ),
+        ];
+
+        for (target, expected) in cases {
+            let url = build_builtin_url(&target, remote_url);
+
+            assert_eq!(url, Ok(expected.to_string()), "for {target:?}");
+        }
+    }
+
+    #[test]
+    fn test_build_url_with_gitea_and_forgejo() {
+        for host in ["gitea.com", "codeberg.org"] {
+            let remote_url = format!("git@{host}:org/repo.git");
+            let cases = [
+                (
+                    branch("feature/foo"),
+                    format!("https://{host}/org/repo/src/branch/feature/foo"),
+                ),
+                (tag("v1.0"), format!("https://{host}/org/repo/src/tag/v1.0")),
+                (
+                    commit("abc123"),
+                    format!("https://{host}/org/repo/commit/abc123"),
+                ),
+            ];
+
+            for (target, expected) in cases {
+                let url = build_builtin_url(&target, &remote_url);
+
+                assert_eq!(url, Ok(expected), "for {target:?} on {host}");
+            }
+        }
+    }
+
+    #[test]
     fn test_build_url_with_unknown_host_branch() {
         let url = build_builtin_url(
             &branch("main"),
@@ -429,19 +451,23 @@ mod tests {
         let cases = [
             (
                 "git@github.com:org/repo.git",
-                "https://github.com/org/repo/pulls/",
+                "https://github.com/org/repo/pulls",
             ),
             (
                 "git@gitlab.com:org/repo.git",
-                "https://gitlab.com/org/repo/-/merge_requests/",
+                "https://gitlab.com/org/repo/-/merge_requests",
             ),
             (
                 "git@bitbucket.org:org/repo.git",
                 "https://bitbucket.org/org/repo/pull-requests/",
             ),
             (
-                "git@gitea.io:org/repo.git",
-                "https://gitea.io/org/repo/pulls/",
+                "git@gitea.com:org/repo.git",
+                "https://gitea.com/org/repo/pulls",
+            ),
+            (
+                "git@codeberg.org:org/repo.git",
+                "https://codeberg.org/org/repo/pulls",
             ),
         ];
 
@@ -454,9 +480,12 @@ mod tests {
 
     #[test]
     fn test_build_url_with_unknown_host_merge_request() {
-        let url = build_builtin_url(&Target::MergeRequest, "git@host.xz:org/repo.git");
+        // gitea.io is the website of Gitea, the repositories are on gitea.com
+        for remote_url in ["git@host.xz:org/repo.git", "git@gitea.io:org/repo.git"] {
+            let url = build_builtin_url(&Target::MergeRequest, remote_url);
 
-        assert_eq!(url, Err(Issue::UnknownProvider));
+            assert_eq!(url, Err(Issue::UnknownProvider), "for {remote_url}");
+        }
     }
 
     // Build a config from the content of git config files, one per level.
@@ -619,6 +648,30 @@ mod tests {
         assert_eq!(
             url,
             Ok("https://bitbucket.company.com/PROJ/repo/commit/abc123".to_string())
+        );
+    }
+
+    #[test]
+    fn test_build_url_without_template_for_the_target_of_builtin_provider() {
+        let (_dir, config) = local_config(
+            "[gitweb \"gitlab.com\"]\n    branch-template = https://{host}/{repository}/-/blob/{branch}/README.md\n",
+        );
+
+        let url = build_url(&commit("abc123"), "git@gitlab.com:org/repo.git", &config);
+
+        assert_eq!(
+            url,
+            Ok("https://gitlab.com/org/repo/-/commit/abc123".to_string())
+        );
+    }
+
+    #[test]
+    fn test_build_url_with_builtin_host_in_another_case() {
+        let url = build_builtin_url(&commit("abc123"), "git@GitLab.com:org/repo.git");
+
+        assert_eq!(
+            url,
+            Ok("https://GitLab.com/org/repo/-/commit/abc123".to_string())
         );
     }
 
@@ -860,44 +913,5 @@ mod tests {
 
         assert_eq!(domain, "github.com");
         assert_eq!(repository, "yoannfleurydev/yoannfleurydev.github.io");
-    }
-
-    #[test]
-    fn test_get_merge_request_parts_with_github() {
-        let MergeRequestParts { path, tail } = get_merge_request_parts(GITHUB_HOSTNAME).unwrap();
-
-        assert_eq!(path, "pulls");
-        assert_eq!(tail, "");
-    }
-
-    #[test]
-    fn test_get_merge_request_parts_with_gitlab() {
-        let MergeRequestParts { path, tail } = get_merge_request_parts(GITLAB_HOSTNAME).unwrap();
-
-        assert_eq!(path, "-/merge_requests");
-        assert_eq!(tail, "");
-    }
-
-    #[test]
-    fn test_get_merge_request_parts_with_bitbucket() {
-        let MergeRequestParts { path, tail } = get_merge_request_parts(BITBUCKET_HOSTNAME).unwrap();
-
-        assert_eq!(path, "pull-requests");
-        assert_eq!(tail, "");
-    }
-
-    #[test]
-    fn test_get_merge_request_parts_with_gitea() {
-        let MergeRequestParts { path, tail } = get_merge_request_parts(GITEA_HOSTNAME).unwrap();
-
-        assert_eq!(path, "pulls");
-        assert_eq!(tail, "");
-    }
-
-    #[test]
-    fn test_get_merge_request_parts_with_unknown_provider() {
-        let result = get_merge_request_parts("host.xz");
-
-        assert_eq!(result.err(), Some(Issue::UnknownProvider));
     }
 }

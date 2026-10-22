@@ -115,9 +115,10 @@ for that.
 
 ## Custom URLs
 
-`gitweb` knows the URLs of github.com, gitlab.com, bitbucket.org and gitea.io,
-and opens GitHub-like URLs for every other host. For a self-hosted forge with
-other URLs, set URL templates for its host in your git config:
+`gitweb` knows the URLs of github.com, gitlab.com, bitbucket.org, gitea.com and
+codeberg.org, and opens GitHub-like URLs for every other host (except for the
+merge requests, which need a template). For a self-hosted forge with other URLs, set
+URL templates for its host in your git config:
 
 ```shell
 git config --global gitweb.<host>.branch-template '<template>'
@@ -134,6 +135,24 @@ git config --global gitweb.bitbucket.company.com.branch-template 'https://{host}
 git config --global gitweb.bitbucket.company.com.tag-template 'https://{host}/projects/{owner}/repos/{repo}/browse?at=refs%2Ftags%2F{tag_encoded}'
 git config --global gitweb.bitbucket.company.com.commit-template 'https://{host}/projects/{owner}/repos/{repo}/commits/{commit}'
 git config --global gitweb.bitbucket.company.com.merge-request-template 'https://{host}/projects/{owner}/repos/{repo}/pull-requests'
+```
+
+A self-hosted GitLab has the URLs of gitlab.com, which are the built-in ones:
+
+```shell
+git config --global gitweb.gitlab.company.com.branch-template 'https://{host}/{repository}/-/tree/{branch}'
+git config --global gitweb.gitlab.company.com.tag-template 'https://{host}/{repository}/-/tree/{tag}'
+git config --global gitweb.gitlab.company.com.commit-template 'https://{host}/{repository}/-/commit/{commit}'
+git config --global gitweb.gitlab.company.com.merge-request-template 'https://{host}/{repository}/-/merge_requests'
+```
+
+And a self-hosted Gitea or Forgejo has the URLs of gitea.com and codeberg.org:
+
+```shell
+git config --global gitweb.gitea.company.com.branch-template 'https://{host}/{repository}/src/branch/{branch}'
+git config --global gitweb.gitea.company.com.tag-template 'https://{host}/{repository}/src/tag/{tag}'
+git config --global gitweb.gitea.company.com.commit-template 'https://{host}/{repository}/commit/{commit}'
+git config --global gitweb.gitea.company.com.merge-request-template 'https://{host}/{repository}/pulls'
 ```
 
 The placeholders of the templates are:
