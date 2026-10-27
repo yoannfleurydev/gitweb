@@ -107,3 +107,74 @@ custom branch or tag you want to open in the browser.
 
 `gitweb` will open the origin remote if it exists. You can override the behavior
 by giving the `--remote` flag with the custom remote you want to open.
+
+The remote is the name of one of the git remotes of the repository (`git remote`
+lists them, usually `origin`, and `upstream` when working on a fork). It does
+not change the shape of the URL that is opened, see [Custom URLs](#custom-urls)
+for that.
+
+## Custom URLs
+
+`gitweb` knows the URLs of github.com, gitlab.com, bitbucket.org, gitea.com and
+codeberg.org, and opens GitHub-like URLs for every other host (except for the
+merge requests, which need a template). For a self-hosted forge with other URLs, set
+URL templates for its host in your git config:
+
+```shell
+git config --global gitweb.<host>.branch-template '<template>'
+git config --global gitweb.<host>.tag-template '<template>'
+git config --global gitweb.<host>.commit-template '<template>'
+git config --global gitweb.<host>.merge-request-template '<template>'
+```
+
+Here is the configuration for a Bitbucket Server (or Data Center), that works
+with both the SSH and the HTTPS remotes:
+
+```shell
+git config --global gitweb.bitbucket.company.com.branch-template 'https://{host}/projects/{owner}/repos/{repo}/browse?at=refs%2Fheads%2F{branch_encoded}'
+git config --global gitweb.bitbucket.company.com.tag-template 'https://{host}/projects/{owner}/repos/{repo}/browse?at=refs%2Ftags%2F{tag_encoded}'
+git config --global gitweb.bitbucket.company.com.commit-template 'https://{host}/projects/{owner}/repos/{repo}/commits/{commit}'
+git config --global gitweb.bitbucket.company.com.merge-request-template 'https://{host}/projects/{owner}/repos/{repo}/pull-requests'
+```
+
+A self-hosted GitLab has the URLs of gitlab.com, which are the built-in ones:
+
+```shell
+git config --global gitweb.gitlab.company.com.branch-template 'https://{host}/{repository}/-/tree/{branch}'
+git config --global gitweb.gitlab.company.com.tag-template 'https://{host}/{repository}/-/tree/{tag}'
+git config --global gitweb.gitlab.company.com.commit-template 'https://{host}/{repository}/-/commit/{commit}'
+git config --global gitweb.gitlab.company.com.merge-request-template 'https://{host}/{repository}/-/merge_requests'
+```
+
+And a self-hosted Gitea or Forgejo has the URLs of gitea.com and codeberg.org:
+
+```shell
+git config --global gitweb.gitea.company.com.branch-template 'https://{host}/{repository}/src/branch/{branch}'
+git config --global gitweb.gitea.company.com.tag-template 'https://{host}/{repository}/src/tag/{tag}'
+git config --global gitweb.gitea.company.com.commit-template 'https://{host}/{repository}/commit/{commit}'
+git config --global gitweb.gitea.company.com.merge-request-template 'https://{host}/{repository}/pulls'
+```
+
+The placeholders of the templates are:
+
+| Placeholder        | Template          | Value                                                  |
+| ------------------ | ----------------- | ------------------------------------------------------ |
+| `{host}`           | all               | the host of the remote, without the port               |
+| `{repository}`     | all               | the path of the repository, like `group/subgroup/repo` |
+| `{owner}`          | all               | the part of the path just before the repository name   |
+| `{repo}`           | all               | the repository name                                    |
+| `{branch}`         | `branch-template` | the branch                                             |
+| `{branch_encoded}` | `branch-template` | the branch, percent-encoded (`/` becomes `%2F`)        |
+| `{tag}`            | `tag-template`    | the tag                                                |
+| `{tag_encoded}`    | `tag-template`    | the tag, percent-encoded (`/` becomes `%2F`)           |
+| `{commit}`         | `commit-template` | the commit                                             |
+
+Write `{{` for a `{` that is not a placeholder. A template is a full URL, so it
+can use `http://` or a port. The host is the one written in the remote: with an
+SSH alias (`git@work:org/repo.git`), the config is `gitweb.work.*` and the
+template has to contain the real host instead of `{host}`.
+
+A template always wins over the built-in URL, even for github.com, and the
+built-in URL is used when no template is set for what is opened. The templates
+can be set per repository with `git config --local`. Run `gitweb --verbose` to
+see the template that is used.

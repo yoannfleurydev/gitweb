@@ -21,6 +21,7 @@ git-url-parse = "0.6"
 git2 = { version = "0.21", features = ["vendored-openssl"] }
 log = "0.4"
 open = "5.4"
+percent-encoding = "2.3"
 thiserror = "2.0"
 
 [dev-dependencies]
