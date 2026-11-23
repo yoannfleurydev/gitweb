@@ -16,7 +16,7 @@ version = "0.6.0"
 anyhow = "1.0"
 clap = { version = "4.6", features = ["derive", "env"] }
 clap_complete = { version = "=4.6.11", features = ["unstable-dynamic"] }
-flexi_logger = "0.31"
+flexi_logger = "0.32"
 git-url-parse = "0.6"
 git2 = { version = "0.21", features = ["vendored-openssl"] }
 log = "0.4"
