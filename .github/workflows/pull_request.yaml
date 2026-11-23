@@ -25,8 +25,7 @@ jobs:
         persist-credentials: false
     - name: Set up Rust toolchain
       run: |
-        rustup toolchain install stable --profile minimal --component clippy
-        rustup default stable
+        rustup toolchain install
     - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
     - name: Run tests
       run: cargo test --verbose

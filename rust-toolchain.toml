@@ -1,0 +1,7 @@
+# Pinned because rustc 1.100.0 rejects git-url-parse 0.6.0 (E0038: nom's
+# `Parser` trait is not dyn compatible). Move back to "stable" once
+# git-url-parse ships a fix.
+[toolchain]
+channel = "1.99.1"
+profile = "minimal"
+components = ["clippy"]
